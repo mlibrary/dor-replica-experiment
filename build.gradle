@@ -17,6 +17,10 @@ repositories {
 	mavenCentral()
 }
 
+test {
+  testLogging.showStandardStreams = true
+}
+
 dependencies {
 	implementation 'io.ocfl:ocfl-java-core:2.2.1'
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'

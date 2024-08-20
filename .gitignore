@@ -35,3 +35,10 @@ out/
 
 ### VS Code ###
 .vscode/
+
+### Testing ###
+src/test/resources/test_repositories/repo_one/storage/*
+src/test/resources/test_repositories/repo_one/workspace/*
+
+### MySQL Docker ###
+.data
