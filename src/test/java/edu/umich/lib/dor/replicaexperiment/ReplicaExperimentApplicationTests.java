@@ -45,17 +45,17 @@ class ReplicaExperimentApplicationTests {
 	private Path repoOnePath = testReposPath.resolve("repo_one");
 	private Path repoOneStoragePath = repoOnePath.resolve("storage");
 	private Path repoOneWorkspacePath = repoOnePath.resolve("workspace");
-	private Path repoOneDepositPath = repoOnePath.resolve("deposit");
 
 	private String repoTwoName = "repo_two";
 	private Path repoTwoPath = testReposPath.resolve("repo_two");
 	private Path repoTwoStoragePath = repoTwoPath.resolve("storage");
 	private Path repoTwoWorkspacePath = repoTwoPath.resolve("workspace");
 
-	private Path stagingPath = testReposPath.resolve("staging");
-
+	private Path depositPath = testReposPath.resolve("deposit");
 	private String depositAIdentifier = "A";
-	private Path depositAPath = repoOneDepositPath.resolve("a");
+	private Path depositAPath = depositPath.resolve("a");
+
+	private Path stagingPath = testReposPath.resolve("staging");
 
 	User testUser = new User("test", "test@example.edu");
 
