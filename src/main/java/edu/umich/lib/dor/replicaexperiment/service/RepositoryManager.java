@@ -4,6 +4,8 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -18,6 +20,8 @@ import edu.umich.lib.dor.replicaexperiment.domain.User;
 
 @Service
 public class RepositoryManager {
+	private static final Log log = LogFactory.getLog(RepositoryManager.class);
+
     RepositoryRepository repositoryRepo;
     ReplicaRepository replicaRepo;
     InfoPackageRepository infoPackageRepo;
@@ -58,10 +62,17 @@ public class RepositoryManager {
         return stagingPath;
     }
 
-    private Repository createRepository(String name) {
-        var aRepository = new Repository(name, RepositoryType.FILE_SYSTEM);
-        repositoryRepo.save(aRepository);
-        return aRepository;
+    private Repository createRepositoryIfNotExists(String name) {
+        Repository repository = repositoryRepo.findByName(name);
+        if (repository != null) {
+            return repository;
+        }
+        log.debug(
+            String.format("Creating new repository record in database with name \"%s\"", name)
+        );
+        var newRepository = new Repository(name, RepositoryType.FILE_SYSTEM);
+        repositoryRepo.save(newRepository);
+        return newRepository;
     }
 
     public Repository getRepository(String name) {
@@ -96,7 +107,7 @@ public class RepositoryManager {
 
     public void registerRepositoryService(String name, RepositoryService service) {
         serviceMap.put(name, service);
-        createRepository(name);
+        createRepositoryIfNotExists(name);
     }
 
     public List<String> listRepositoryServices(){
@@ -123,8 +134,8 @@ public class RepositoryManager {
                 "user=%s, " +
                 "stagingPath=%s",
             String.join(", ", repoServices),
-            user.toString(),
-            stagingPath.toString()
+            user == null ? "null" : user.toString(),
+            stagingPath == null ? "null" : stagingPath.toString()
         );
     }
 
