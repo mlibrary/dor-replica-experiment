@@ -97,7 +97,7 @@ class ReplicaExperimentApplicationTests {
 	}
 
 	@Test
-	void repositoryManagerCanCreateAPackageInARepository() {
+	void repositoryManagerCanAddAPackageToARepository() {
 		repositoryManager.registerRepositoryService(repoOneName, repoOneService);
 		repositoryManager.setUser(testUser);
 		log.debug(repositoryManager);
