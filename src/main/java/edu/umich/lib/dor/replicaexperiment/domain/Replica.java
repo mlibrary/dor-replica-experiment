@@ -38,6 +38,10 @@ public class Replica {
         return repository;
     }
 
+    public InfoPackage getInfoPackage() {
+        return infoPackage;
+    }
+
     @Override
     public String toString() {
         return String.format(

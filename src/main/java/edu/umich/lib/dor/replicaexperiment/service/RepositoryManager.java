@@ -22,6 +22,7 @@ public class RepositoryManager {
     ReplicaRepository replicaRepo;
     InfoPackageRepository infoPackageRepo;
     User user;
+    Path stagingPath;
     HashMap<String, RepositoryService> serviceMap = new HashMap<>();
 
     @Autowired
@@ -42,6 +43,24 @@ public class RepositoryManager {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    private User getUser() {
+        if (user == null) {
+            throw new IllegalArgumentException("user must be set.");
+        }
+        return user;
+    }
+
+    public void setStagingPath(Path stagingPath) {
+        this.stagingPath = stagingPath;
+    }
+
+    private Path getStagingPath() {
+        if (stagingPath == null) {
+            throw new IllegalArgumentException("stagingPath must be set.");
+        }
+        return stagingPath;
     }
 
     private Repository createRepository(String name) {
@@ -89,15 +108,12 @@ public class RepositoryManager {
     public void addPackageToRepository(
         String packageIdentifier, Path sourcePath, String repositoryName, String message
     ) {
-        if (user == null) {
-            throw new IllegalArgumentException("user must be set.");
-        }
         var repository = repositoryRepo.findByName(repositoryName);
         createInfoPackage(packageIdentifier);
         var infoPackage = infoPackageRepo.findByIdentifier(packageIdentifier);
 
         var ocflRepoService = getRepositoryService(repositoryName);
-        ocflRepoService.createObject(packageIdentifier, sourcePath, user, message);
+        ocflRepoService.createObject(packageIdentifier, sourcePath, getUser(), message);
         createReplica(infoPackage, repository);
     }
 
@@ -113,4 +129,19 @@ public class RepositoryManager {
     public List<Replica> getReplicas() {
         return replicaRepo.findAll();
     }
+
+    public void replicatePackageToAnotherRepository(
+        String packageIdentifier, String sourceRepoName, String targetRepoName
+    ) {
+        Path stagingPath = getStagingPath();
+        Path objectPathInStaging = stagingPath.resolve(packageIdentifier);
+        RepositoryService sourceRepoService = getRepositoryService(sourceRepoName);
+        RepositoryService targetRepoService = getRepositoryService(targetRepoName);
+
+        sourceRepoService.exportObject(packageIdentifier, objectPathInStaging);
+        targetRepoService.importObject(objectPathInStaging);
+        InfoPackage infoPackage = infoPackageRepo.findByIdentifier(packageIdentifier);
+        Repository repository = repositoryRepo.findByName(targetRepoName);
+        createReplica(infoPackage, repository);
+    };
 }

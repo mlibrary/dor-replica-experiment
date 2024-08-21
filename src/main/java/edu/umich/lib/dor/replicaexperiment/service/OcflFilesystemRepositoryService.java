@@ -87,4 +87,15 @@ public class OcflFilesystemRepositoryService implements RepositoryService {
         );
         return this;
     }
+
+    public RepositoryService importObject(Path inputPath) {
+        // TO DO: Is MOVE_SOURCE OK? Keeps staging clear
+        repo.importObject(inputPath, OcflOption.MOVE_SOURCE);
+        return this;
+    }
+
+    public RepositoryService exportObject(String objectId, Path outputPath) {
+        repo.exportObject(objectId, outputPath);
+        return this;
+    }
 }

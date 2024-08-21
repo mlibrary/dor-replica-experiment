@@ -21,4 +21,8 @@ public interface RepositoryService {
     );
 
     List<String> getFilePaths(String id);
+
+    RepositoryService importObject(Path inputPath);
+
+    RepositoryService exportObject(String objectId, Path outputPath);
 }

@@ -24,6 +24,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.util.FileSystemUtils;
 
 import edu.umich.lib.dor.replicaexperiment.domain.InfoPackage;
+import edu.umich.lib.dor.replicaexperiment.domain.Replica;
 import edu.umich.lib.dor.replicaexperiment.domain.Repository;
 import edu.umich.lib.dor.replicaexperiment.domain.User;
 import edu.umich.lib.dor.replicaexperiment.service.OcflFilesystemRepositoryService;
@@ -40,17 +41,29 @@ class ReplicaExperimentApplicationTests {
 	private static final Log log = LogFactory.getLog(ReplicaExperimentApplication.class);
 
 	private Path testReposPath = Paths.get("src", "test", "resources", "test_repositories");
+	private String repoOneName = "repo_one";
 	private Path repoOnePath = testReposPath.resolve("repo_one");
 	private Path repoOneStoragePath = repoOnePath.resolve("storage");
 	private Path repoOneWorkspacePath = repoOnePath.resolve("workspace");
 	private Path repoOneDepositPath = repoOnePath.resolve("deposit");
 
+	private String repoTwoName = "repo_two";
+	private Path repoTwoPath = testReposPath.resolve("repo_two");
+	private Path repoTwoStoragePath = repoTwoPath.resolve("storage");
+	private Path repoTwoWorkspacePath = repoTwoPath.resolve("workspace");
+
+	private Path stagingPath = testReposPath.resolve("staging");
+
+	private String depositAIdentifier = "A";
 	private Path depositAPath = repoOneDepositPath.resolve("a");
+
+	User testUser = new User("test", "test@example.edu");
 
 	@Autowired
 	private RepositoryManager repositoryManager;
 
 	private RepositoryService repoOneService;
+	private RepositoryService repoTwoService;
 
 	void resetDirPath(Path path) {
 		if (Files.exists(path)) {
@@ -70,8 +83,12 @@ class ReplicaExperimentApplicationTests {
 	@BeforeEach
 	void init() {
 		resetDirPath(repoOneStoragePath);
+		resetDirPath(repoTwoStoragePath);
 		this.repoOneService = new OcflFilesystemRepositoryService(
 			repoOneStoragePath, repoOneWorkspacePath
+		);
+		this.repoTwoService = new OcflFilesystemRepositoryService(
+			repoTwoStoragePath, repoTwoWorkspacePath
 		);
 	}
 
@@ -80,32 +97,58 @@ class ReplicaExperimentApplicationTests {
 	}
 
 	@Test
-	void dorCanCreateAPackageInARepository() {
-		repositoryManager.registerRepositoryService("repo_one", repoOneService);
-		repositoryManager.setUser(new User("test", "test@example.edu"));
-
-		String repositoryName = "repo_one";
-		String identifier = "A";
-		Path sourcePath = depositAPath;
-
+	void repositoryManagerCanCreateAPackageInARepository() {
+		repositoryManager.registerRepositoryService(repoOneName, repoOneService);
+		repositoryManager.setUser(testUser);
 		repositoryManager.addPackageToRepository(
-			identifier, sourcePath, repositoryName, "first version!!!"
+			depositAIdentifier, depositAPath, repoOneName, "first version!!!"
 		);
 
-		InfoPackage infoPackageA = repositoryManager.getInfoPackage(identifier);
-		Repository repository = repositoryManager.getRepository(repositoryName);
+		InfoPackage infoPackageA = repositoryManager.getInfoPackage(depositAIdentifier);
+		Repository repository = repositoryManager.getRepository(repoOneName);
 
 		assertEquals("A", infoPackageA.getIdentifier());
 
 		assertEquals("FILE_SYSTEM", repository.getType());
-		assertEquals(repositoryName, repository.getName());
+		assertEquals(repoOneName, repository.getName());
 
-		assertTrue(infoPackageA.getReplicas().size() == 1);
-		assertTrue(infoPackageA.hasAReplicaIn(repositoryName));
+		assertEquals(1, infoPackageA.getReplicas().size());
+		assertTrue(infoPackageA.hasAReplicaIn(repoOneName));
 
-		List<String> filePaths = repoOneService.getFilePaths(identifier);
+		List<String> filePaths = repoOneService.getFilePaths(depositAIdentifier);
 		for (String filePath: filePaths) {
 			Path fullPath = repoOneStoragePath.resolve(filePath);
+			assertTrue(Files.exists(fullPath));
+		}
+	}
+
+	@Test
+	void repositoryManagerCanReplicateAPackageToAnotherRepository() {
+		repositoryManager.registerRepositoryService(repoOneName, repoOneService);
+		repositoryManager.registerRepositoryService(repoTwoName, repoTwoService);
+		repositoryManager.setUser(testUser);
+		repositoryManager.setStagingPath(stagingPath);
+
+		repositoryManager.addPackageToRepository(
+			depositAIdentifier, depositAPath, repoOneName, "first version!!!"
+		);
+		repositoryManager.replicatePackageToAnotherRepository(
+			depositAIdentifier, repoOneName, repoTwoName
+		);
+
+		InfoPackage infoPackage = repositoryManager.getInfoPackage(depositAIdentifier);
+		assertEquals(2, infoPackage.getNumReplicas());
+		Repository repositoryTwo = repositoryManager.getRepository(repoTwoName);
+		var replicasInRepoTwo = repositoryTwo.getReplicas();
+		assertEquals(1, replicasInRepoTwo.size());
+		if (replicasInRepoTwo.size() == 1) {
+			Replica repoTwoReplica = replicasInRepoTwo.iterator().next();
+			assertEquals(depositAIdentifier, repoTwoReplica.getInfoPackage().getIdentifier());
+		}
+
+		List<String> filePaths = repoTwoService.getFilePaths(depositAIdentifier);
+		for (String filePath: filePaths) {
+			Path fullPath = repoTwoStoragePath.resolve(filePath);
 			assertTrue(Files.exists(fullPath));
 		}
 	}
