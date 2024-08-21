@@ -33,7 +33,7 @@ import edu.umich.lib.dor.replicaexperiment.service.RepositoryService;
 
 @Import(TestcontainersConfiguration.class)
 @DataJpaTest
-@ContextConfiguration(classes = {AppConfig.class, TestConfiguration.class})
+@ContextConfiguration(classes = {TestsConfig.class, TestConfiguration.class})
 @ComponentScan(basePackages={"edu.umich.lib.dor.replicaexperiment.service"}) 
 @EntityScan(basePackages={"edu.umich.lib.dor.replicaexperiment.domain"})
 @AutoConfigureTestDatabase(replace = Replace.NONE)
