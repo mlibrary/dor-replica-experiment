@@ -100,6 +100,7 @@ class ReplicaExperimentApplicationTests {
 	void repositoryManagerCanAddAPackageToARepository() {
 		repositoryManager.registerRepositoryService(repoOneName, repoOneService);
 		repositoryManager.setUser(testUser);
+		repositoryManager.setStagingPath(stagingPath);
 		log.debug(repositoryManager);
 
 		repositoryManager.addPackageToRepository(
