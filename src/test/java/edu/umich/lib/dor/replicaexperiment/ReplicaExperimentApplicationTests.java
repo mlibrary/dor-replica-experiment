@@ -100,6 +100,8 @@ class ReplicaExperimentApplicationTests {
 	void repositoryManagerCanCreateAPackageInARepository() {
 		repositoryManager.registerRepositoryService(repoOneName, repoOneService);
 		repositoryManager.setUser(testUser);
+		log.debug(repositoryManager);
+
 		repositoryManager.addPackageToRepository(
 			depositAIdentifier, depositAPath, repoOneName, "first version!!!"
 		);
@@ -128,6 +130,7 @@ class ReplicaExperimentApplicationTests {
 		repositoryManager.registerRepositoryService(repoTwoName, repoTwoService);
 		repositoryManager.setUser(testUser);
 		repositoryManager.setStagingPath(stagingPath);
+		log.debug(repositoryManager);
 
 		repositoryManager.addPackageToRepository(
 			depositAIdentifier, depositAPath, repoOneName, "first version!!!"

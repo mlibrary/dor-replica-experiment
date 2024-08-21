@@ -38,7 +38,15 @@ public class RepositoryManager {
 
     @Override
     public String toString() {
-        return "RepositoryManager[]";
+        List<String> repoServices = listRepositoryServices();
+        return String.format(
+            "RepositoryManager[repoServices=[%s], " +
+                "user=%s, " +
+                "stagingPath=%s",
+            String.join(", ", repoServices),
+            user.toString(),
+            stagingPath.toString()
+        );
     }
 
     public void setUser(User user) {
@@ -91,8 +99,10 @@ public class RepositoryManager {
         createRepository(name);
     }
 
-    public Object[] listRepositoryServices(){
-        return serviceMap.keySet().toArray();
+    public List<String> listRepositoryServices(){
+        return serviceMap.keySet()
+            .stream()
+            .toList();
     }
 
     private RepositoryService getRepositoryService(String name) {
