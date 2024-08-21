@@ -36,19 +36,6 @@ public class RepositoryManager {
         this.replicaRepo = replicaRepo;
     }
 
-    @Override
-    public String toString() {
-        List<String> repoServices = listRepositoryServices();
-        return String.format(
-            "RepositoryManager[repoServices=[%s], " +
-                "user=%s, " +
-                "stagingPath=%s",
-            String.join(", ", repoServices),
-            user.toString(),
-            stagingPath.toString()
-        );
-    }
-
     public void setUser(User user) {
         this.user = user;
     }
@@ -77,9 +64,18 @@ public class RepositoryManager {
         return aRepository;
     }
 
+    public Repository getRepository(String name) {
+        return repositoryRepo.findByName(name);
+    }
+
     private InfoPackage createInfoPackage(String identifier) {
         var infoPackage = new InfoPackage(identifier);
         infoPackageRepo.save(infoPackage);
+        return infoPackage;
+    }
+
+    public InfoPackage getInfoPackage(String identifier) {
+        InfoPackage infoPackage = infoPackageRepo.findByIdentifier(identifier);
         return infoPackage;
     }
 
@@ -92,6 +88,10 @@ public class RepositoryManager {
         infoPackageRepo.save(infoPackage);
         repository.addReplica(replica);
         repositoryRepo.save(repository);
+    }
+
+    public List<Replica> getReplicas() {
+        return replicaRepo.findAll();
     }
 
     public void registerRepositoryService(String name, RepositoryService service) {
@@ -115,6 +115,19 @@ public class RepositoryManager {
         return service;
     }
 
+    @Override
+    public String toString() {
+        List<String> repoServices = listRepositoryServices();
+        return String.format(
+            "RepositoryManager[repoServices=[%s], " +
+                "user=%s, " +
+                "stagingPath=%s",
+            String.join(", ", repoServices),
+            user.toString(),
+            stagingPath.toString()
+        );
+    }
+
     public void addPackageToRepository(
         String packageIdentifier, Path sourcePath, String repositoryName, String message
     ) {
@@ -125,19 +138,6 @@ public class RepositoryManager {
         var ocflRepoService = getRepositoryService(repositoryName);
         ocflRepoService.createObject(packageIdentifier, sourcePath, getUser(), message);
         createReplica(infoPackage, repository);
-    }
-
-    public InfoPackage getInfoPackage(String identifier) {
-        InfoPackage infoPackage = infoPackageRepo.findByIdentifier(identifier);
-        return infoPackage;
-    }
-
-    public Repository getRepository(String name) {
-        return repositoryRepo.findByName(name);
-    }
-
-    public List<Replica> getReplicas() {
-        return replicaRepo.findAll();
     }
 
     public void replicatePackageToAnotherRepository(
