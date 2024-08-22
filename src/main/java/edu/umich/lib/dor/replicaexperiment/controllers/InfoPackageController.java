@@ -21,6 +21,8 @@ import edu.umich.lib.dor.replicaexperiment.service.RepositoryManager;
 @Controller
 @RequestMapping(path="/package")
 public class InfoPackageController {
+    User testUser = new User("test", "test@example.edu");
+
     @Autowired
     private InfoPackageRepository infoPackageRepository;
 
@@ -35,7 +37,7 @@ public class InfoPackageController {
         @RequestParam String message
     ) {
         Path sourcePathRelativeToDeposit = Paths.get(depositSourcePath);
-        repositoryManager.setUser(new User("test", "test@example.edu"));
+        repositoryManager.setUser(testUser);
         repositoryManager.addPackageToRepository(
             identifier, sourcePathRelativeToDeposit, repository, message
         );
@@ -49,6 +51,7 @@ public class InfoPackageController {
         @RequestParam String sourceRepository,
         @RequestParam String targetRepository
     ) {
+        repositoryManager.setUser(testUser);
         repositoryManager.replicatePackageToAnotherRepository(
             identifier, sourceRepository, targetRepository
         );
