@@ -29,9 +29,9 @@ import edu.umich.lib.dor.replicaexperiment.domain.Repository;
 import edu.umich.lib.dor.replicaexperiment.domain.User;
 import edu.umich.lib.dor.replicaexperiment.service.InfoPackageService;
 import edu.umich.lib.dor.replicaexperiment.service.OcflFilesystemRepositoryClient;
+import edu.umich.lib.dor.replicaexperiment.service.RepositoryClient;
 import edu.umich.lib.dor.replicaexperiment.service.RepositoryManager;
 import edu.umich.lib.dor.replicaexperiment.service.RepositoryService;
-import edu.umich.lib.dor.replicaexperiment.service.RepositoryClient;
 
 @Import(TestcontainersConfiguration.class)
 @DataJpaTest

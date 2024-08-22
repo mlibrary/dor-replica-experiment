@@ -14,9 +14,9 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 import edu.umich.lib.dor.replicaexperiment.service.InfoPackageService;
 import edu.umich.lib.dor.replicaexperiment.service.OcflFilesystemRepositoryClient;
 import edu.umich.lib.dor.replicaexperiment.service.ReplicaService;
+import edu.umich.lib.dor.replicaexperiment.service.RepositoryClient;
 import edu.umich.lib.dor.replicaexperiment.service.RepositoryManager;
 import edu.umich.lib.dor.replicaexperiment.service.RepositoryService;
-import edu.umich.lib.dor.replicaexperiment.service.RepositoryClient;
 
 @Configuration
 @ComponentScan("edu.umich.lib.dor.replicaexperiment.service")
