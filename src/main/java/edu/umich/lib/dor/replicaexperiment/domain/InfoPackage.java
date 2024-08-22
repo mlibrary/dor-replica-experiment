@@ -21,7 +21,7 @@ public class InfoPackage {
     @NaturalId
     private String identifier;
 
-    @OneToMany(mappedBy="infoPackage", fetch=FetchType.EAGER)
+    @OneToMany(mappedBy="infoPackage", fetch=FetchType.LAZY)
     private Set<Replica> replicas = new HashSet<>();
 
     protected InfoPackage() {}

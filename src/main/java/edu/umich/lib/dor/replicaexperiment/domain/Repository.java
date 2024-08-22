@@ -26,7 +26,7 @@ public class Repository {
     @Enumerated(EnumType.STRING)
     private RepositoryType type;
 
-    @OneToMany(mappedBy="repository", fetch=FetchType.EAGER)
+    @OneToMany(mappedBy="repository", fetch=FetchType.LAZY)
     Set<Replica> replicas = new HashSet<>();
 
     public void addReplica(Replica replica) {
