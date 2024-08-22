@@ -26,6 +26,7 @@ public class RepositoryManager {
     ReplicaRepository replicaRepo;
     InfoPackageRepository infoPackageRepo;
     User user;
+    Path depositPath;
     Path stagingPath;
     HashMap<String, RepositoryService> serviceMap = new HashMap<>();
 
@@ -60,6 +61,17 @@ public class RepositoryManager {
             throw new IllegalArgumentException("stagingPath must be set.");
         }
         return stagingPath;
+    }
+
+    public void setDepositPath(Path depositPath) {
+        this.depositPath = depositPath;
+    }
+
+    private Path getDepositPath() {
+        if (depositPath == null) {
+            throw new IllegalArgumentException("depositPath must be set.");
+        }
+        return depositPath;
     }
 
     private Repository createRepositoryIfNotExists(String name) {
@@ -132,9 +144,11 @@ public class RepositoryManager {
         return String.format(
             "RepositoryManager[repoServices=[%s], " +
                 "user=%s, " +
+                "depositPath=%s" +
                 "stagingPath=%s",
             String.join(", ", repoServices),
             user == null ? "null" : user.toString(),
+            depositPath == null ? "null" : depositPath.toString(),
             stagingPath == null ? "null" : stagingPath.toString()
         );
     }
@@ -142,12 +156,13 @@ public class RepositoryManager {
     public void addPackageToRepository(
         String packageIdentifier, Path sourcePath, String repositoryName, String message
     ) {
+        Path fullSourcePath = getDepositPath().resolve(sourcePath);
         var repository = repositoryRepo.findByName(repositoryName);
         createInfoPackage(packageIdentifier);
         var infoPackage = infoPackageRepo.findByIdentifier(packageIdentifier);
 
         var ocflRepoService = getRepositoryService(repositoryName);
-        ocflRepoService.createObject(packageIdentifier, sourcePath, getUser(), message);
+        ocflRepoService.createObject(packageIdentifier, fullSourcePath, getUser(), message);
         createReplica(infoPackage, repository);
     }
 

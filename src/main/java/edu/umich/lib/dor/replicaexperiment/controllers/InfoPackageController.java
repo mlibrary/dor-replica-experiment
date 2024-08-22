@@ -5,7 +5,6 @@ import java.nio.file.Paths;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -28,9 +27,6 @@ public class InfoPackageController {
     @Autowired
     private RepositoryManager repositoryManager;
 
-    @Autowired
-    private Environment environment;
-
     @PostMapping(path="/add")
     public @ResponseBody InfoPackageDto addPackageToRepository (
         @RequestParam String identifier,
@@ -38,14 +34,10 @@ public class InfoPackageController {
         @RequestParam String repository,
         @RequestParam String message
     ) {
-		Path depositPath = Paths.get(
-			environment.getRequiredProperty("repository.deposit.path")
-		);
-        Path fullSourcePath = depositPath.resolve(depositSourcePath);
-
+        Path sourcePathRelativeToDeposit = Paths.get(depositSourcePath);
         repositoryManager.setUser(new User("test", "test@example.edu"));
         repositoryManager.addPackageToRepository(
-            identifier, fullSourcePath, repository, message
+            identifier, sourcePathRelativeToDeposit, repository, message
         );
         var newInfoPackage = repositoryManager.getInfoPackage(identifier);
         return new InfoPackageDto(newInfoPackage);

@@ -35,6 +35,9 @@ public class AppConfig {
 		Path repoTwoPath = Paths.get(
 			environment.getRequiredProperty("repository.repo_two.path")
 		);
+		Path depositPath = Paths.get(
+			environment.getRequiredProperty("repository.deposit.path")
+		);
 		Path stagingPath = Paths.get(
 			environment.getRequiredProperty("repository.staging.path")
 		);
@@ -58,6 +61,7 @@ public class AppConfig {
 			infoPackageRepository,
 			replicaRepository
 		);
+		manager.setDepositPath(depositPath);
         manager.setStagingPath(stagingPath);
 		manager.registerRepositoryService(repoOneName, repoOneService);
 		manager.registerRepositoryService(repoTwoName, repoTwoService);

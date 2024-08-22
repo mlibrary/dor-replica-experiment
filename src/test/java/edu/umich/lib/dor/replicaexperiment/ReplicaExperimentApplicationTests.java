@@ -53,7 +53,7 @@ class ReplicaExperimentApplicationTests {
 
 	private Path depositPath = testReposPath.resolve("deposit");
 	private String depositAIdentifier = "A";
-	private Path depositAPath = depositPath.resolve("a");
+	private Path depositAPath = Paths.get("A");
 
 	private Path stagingPath = testReposPath.resolve("staging");
 
@@ -100,6 +100,7 @@ class ReplicaExperimentApplicationTests {
 	void repositoryManagerCanAddAPackageToARepository() {
 		repositoryManager.registerRepositoryService(repoOneName, repoOneService);
 		repositoryManager.setUser(testUser);
+		repositoryManager.setDepositPath(depositPath);
 		repositoryManager.setStagingPath(stagingPath);
 		log.debug(repositoryManager);
 
@@ -130,6 +131,7 @@ class ReplicaExperimentApplicationTests {
 		repositoryManager.registerRepositoryService(repoOneName, repoOneService);
 		repositoryManager.registerRepositoryService(repoTwoName, repoTwoService);
 		repositoryManager.setUser(testUser);
+		repositoryManager.setDepositPath(depositPath);
 		repositoryManager.setStagingPath(stagingPath);
 		log.debug(repositoryManager);
 
