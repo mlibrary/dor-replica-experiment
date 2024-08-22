@@ -13,9 +13,9 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 import edu.umich.lib.dor.replicaexperiment.domain.InfoPackageRepository;
 import edu.umich.lib.dor.replicaexperiment.domain.ReplicaRepository;
 import edu.umich.lib.dor.replicaexperiment.domain.RepositoryRepository;
-import edu.umich.lib.dor.replicaexperiment.service.OcflFilesystemRepositoryService;
+import edu.umich.lib.dor.replicaexperiment.service.OcflFilesystemRepositoryClient;
 import edu.umich.lib.dor.replicaexperiment.service.RepositoryManager;
-import edu.umich.lib.dor.replicaexperiment.service.RepositoryService;
+import edu.umich.lib.dor.replicaexperiment.service.RepositoryClient;
 
 @Configuration
 @ComponentScan("edu.umich.lib.dor.replicaexperiment.service")
@@ -45,14 +45,14 @@ public class AppConfig {
 		String repoOneName = "repo_one";
 		Path repoOneStoragePath = repoOnePath.resolve("storage");
 		Path repoOneWorkspacePath = repoOnePath.resolve("workspace");
-		RepositoryService repoOneService = new OcflFilesystemRepositoryService(
+		RepositoryClient repoOneClient = new OcflFilesystemRepositoryClient(
 			repoOneStoragePath, repoOneWorkspacePath
 		);
 
 		String repoTwoName = "repo_two";
 		Path repoTwoStoragePath = repoTwoPath.resolve("storage");
 		Path repoTwoWorkspacePath = repoTwoPath.resolve("workspace");
-		RepositoryService repoTwoService = new OcflFilesystemRepositoryService(
+		RepositoryClient repoTwoClient = new OcflFilesystemRepositoryClient(
 			repoTwoStoragePath, repoTwoWorkspacePath
 		);
 
@@ -63,8 +63,8 @@ public class AppConfig {
 		);
 		manager.setDepositPath(depositPath);
         manager.setStagingPath(stagingPath);
-		manager.registerRepositoryService(repoOneName, repoOneService);
-		manager.registerRepositoryService(repoTwoName, repoTwoService);
+		manager.registerRepository(repoOneName, repoOneClient);
+		manager.registerRepository(repoTwoName, repoTwoClient);
         return manager;
 	}
 }

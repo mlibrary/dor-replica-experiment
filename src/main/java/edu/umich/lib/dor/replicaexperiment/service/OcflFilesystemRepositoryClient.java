@@ -15,12 +15,12 @@ import io.ocfl.core.extension.storage.layout.config.HashedNTupleLayoutConfig;
 
 import edu.umich.lib.dor.replicaexperiment.domain.User;
 
-public class OcflFilesystemRepositoryService implements RepositoryService {
-	private static final Log log = LogFactory.getLog(OcflFilesystemRepositoryService.class);
+public class OcflFilesystemRepositoryClient implements RepositoryClient {
+	private static final Log log = LogFactory.getLog(OcflFilesystemRepositoryClient.class);
 
     private OcflRepository repo;
 
-    public OcflFilesystemRepositoryService(Path rootPath, Path workPath) {
+    public OcflFilesystemRepositoryClient(Path rootPath, Path workPath) {
         this.repo = new OcflRepositoryBuilder()
             .prettyPrintJson()
             .defaultLayoutConfig(new HashedNTupleLayoutConfig())
@@ -33,7 +33,7 @@ public class OcflFilesystemRepositoryService implements RepositoryService {
         return new VersionInfo().setUser(user.username(), user.email()).setMessage(message);
     }
 
-    public RepositoryService createObject(String id, Path inputPath, User user, String message) {
+    public RepositoryClient createObject(String id, Path inputPath, User user, String message) {
         repo.putObject(
             ObjectVersionId.head(id),
             inputPath,
@@ -42,12 +42,12 @@ public class OcflFilesystemRepositoryService implements RepositoryService {
         return this;
     }
 
-    public RepositoryService readObject(String id, Path outputPath) {
+    public RepositoryClient readObject(String id, Path outputPath) {
         repo.getObject(ObjectVersionId.head(id), outputPath);
         return this;
     }
 
-    public RepositoryService deleteObject(String id) {
+    public RepositoryClient deleteObject(String id) {
         repo.purgeObject(id);
         return this;
     }
@@ -68,7 +68,7 @@ public class OcflFilesystemRepositoryService implements RepositoryService {
         return filePaths;
     }
 
-    public RepositoryService deleteObjectFile(String objectId, String filePath, User user, String message) {
+    public RepositoryClient deleteObjectFile(String objectId, String filePath, User user, String message) {
         repo.updateObject(
             ObjectVersionId.head(objectId),
             createNewVersion(user, message),
@@ -77,7 +77,7 @@ public class OcflFilesystemRepositoryService implements RepositoryService {
         return this;
     }
 
-    public RepositoryService updateObjectFile(
+    public RepositoryClient updateObjectFile(
         String objectId, Path inputPath, String filePath, User user, String message
     ) {
         repo.updateObject(
@@ -88,13 +88,13 @@ public class OcflFilesystemRepositoryService implements RepositoryService {
         return this;
     }
 
-    public RepositoryService importObject(Path inputPath) {
+    public RepositoryClient importObject(Path inputPath) {
         // TO DO: Is MOVE_SOURCE OK? Keeps staging clear
         repo.importObject(inputPath, OcflOption.MOVE_SOURCE);
         return this;
     }
 
-    public RepositoryService exportObject(String objectId, Path outputPath) {
+    public RepositoryClient exportObject(String objectId, Path outputPath) {
         repo.exportObject(objectId, outputPath);
         return this;
     }

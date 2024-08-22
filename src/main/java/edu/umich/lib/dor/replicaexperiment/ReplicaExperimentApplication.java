@@ -22,7 +22,6 @@ public class ReplicaExperimentApplication implements CommandLineRunner {
 
 	@Override
 	public void run(String... args) throws Exception {
-		log.debug(repositoryManager.listRepositoryServices());
 		log.debug(repositoryManager);
 	}
 }

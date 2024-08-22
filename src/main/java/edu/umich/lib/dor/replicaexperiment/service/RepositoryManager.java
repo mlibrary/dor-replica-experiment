@@ -28,7 +28,7 @@ public class RepositoryManager {
     User user;
     Path depositPath;
     Path stagingPath;
-    HashMap<String, RepositoryService> serviceMap = new HashMap<>();
+    HashMap<String, RepositoryClient> clientMap = new HashMap<>();
 
     @Autowired
     public RepositoryManager(
@@ -117,36 +117,40 @@ public class RepositoryManager {
         return replicaRepo.findAll();
     }
 
-    public void registerRepositoryService(String name, RepositoryService service) {
-        serviceMap.put(name, service);
+    public void registerRepository(String name, RepositoryClient client) {
+        clientMap.put(name, client);
         createRepositoryIfNotExists(name);
     }
 
-    public List<String> listRepositoryServices(){
-        return serviceMap.keySet()
+    public List<String> listRepositories(){
+        return clientMap.keySet()
             .stream()
             .toList();
     }
 
-    private RepositoryService getRepositoryService(String name) {
-        RepositoryService service = serviceMap.get(name);
-        if (service == null) {
+    private RepositoryClient getRepositoryClient(String name) {
+        RepositoryClient client = clientMap.get(name);
+        if (client == null) {
             throw new IllegalArgumentException(
                 String.format("\"%s\" is not a registered repository.", name)
             );
         }
-        return service;
+        return client;
     }
 
     @Override
     public String toString() {
-        List<String> repoServices = listRepositoryServices();
+        List<String> repoClientNames = listRepositories();
         return String.format(
-            "RepositoryManager[repoServices=[%s], " +
+            (
+                "RepositoryManager[" +
+                "repositories=[%s], " +
                 "user=%s, " +
-                "depositPath=%s" +
-                "stagingPath=%s",
-            String.join(", ", repoServices),
+                "depositPath=%s, " +
+                "stagingPath=%s" +
+                "]"
+            ),
+            String.join(", ", repoClientNames),
             user == null ? "null" : user.toString(),
             depositPath == null ? "null" : depositPath.toString(),
             stagingPath == null ? "null" : stagingPath.toString()
@@ -161,8 +165,8 @@ public class RepositoryManager {
         createInfoPackage(packageIdentifier);
         var infoPackage = infoPackageRepo.findByIdentifier(packageIdentifier);
 
-        var ocflRepoService = getRepositoryService(repositoryName);
-        ocflRepoService.createObject(packageIdentifier, fullSourcePath, getUser(), message);
+        var ocflRepoClient = getRepositoryClient(repositoryName);
+        ocflRepoClient.createObject(packageIdentifier, fullSourcePath, getUser(), message);
         createReplica(infoPackage, repository);
     }
 
@@ -171,11 +175,11 @@ public class RepositoryManager {
     ) {
         Path stagingPath = getStagingPath();
         Path objectPathInStaging = stagingPath.resolve(packageIdentifier);
-        RepositoryService sourceRepoService = getRepositoryService(sourceRepoName);
-        RepositoryService targetRepoService = getRepositoryService(targetRepoName);
+        RepositoryClient sourceRepoClient = getRepositoryClient(sourceRepoName);
+        RepositoryClient targetRepoClient = getRepositoryClient(targetRepoName);
 
-        sourceRepoService.exportObject(packageIdentifier, objectPathInStaging);
-        targetRepoService.importObject(objectPathInStaging);
+        sourceRepoClient.exportObject(packageIdentifier, objectPathInStaging);
+        targetRepoClient.importObject(objectPathInStaging);
         InfoPackage infoPackage = infoPackageRepo.findByIdentifier(packageIdentifier);
         Repository repository = repositoryRepo.findByName(targetRepoName);
         createReplica(infoPackage, repository);

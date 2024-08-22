@@ -27,9 +27,9 @@ import edu.umich.lib.dor.replicaexperiment.domain.InfoPackage;
 import edu.umich.lib.dor.replicaexperiment.domain.Replica;
 import edu.umich.lib.dor.replicaexperiment.domain.Repository;
 import edu.umich.lib.dor.replicaexperiment.domain.User;
-import edu.umich.lib.dor.replicaexperiment.service.OcflFilesystemRepositoryService;
+import edu.umich.lib.dor.replicaexperiment.service.OcflFilesystemRepositoryClient;
 import edu.umich.lib.dor.replicaexperiment.service.RepositoryManager;
-import edu.umich.lib.dor.replicaexperiment.service.RepositoryService;
+import edu.umich.lib.dor.replicaexperiment.service.RepositoryClient;
 
 @Import(TestcontainersConfiguration.class)
 @DataJpaTest
@@ -62,8 +62,8 @@ class ReplicaExperimentApplicationTests {
 	@Autowired
 	private RepositoryManager repositoryManager;
 
-	private RepositoryService repoOneService;
-	private RepositoryService repoTwoService;
+	private RepositoryClient repoOneClient;
+	private RepositoryClient repoTwoClient;
 
 	void resetDirPath(Path path) {
 		if (Files.exists(path)) {
@@ -84,10 +84,10 @@ class ReplicaExperimentApplicationTests {
 	void init() {
 		resetDirPath(repoOneStoragePath);
 		resetDirPath(repoTwoStoragePath);
-		this.repoOneService = new OcflFilesystemRepositoryService(
+		this.repoOneClient = new OcflFilesystemRepositoryClient(
 			repoOneStoragePath, repoOneWorkspacePath
 		);
-		this.repoTwoService = new OcflFilesystemRepositoryService(
+		this.repoTwoClient = new OcflFilesystemRepositoryClient(
 			repoTwoStoragePath, repoTwoWorkspacePath
 		);
 	}
@@ -98,7 +98,7 @@ class ReplicaExperimentApplicationTests {
 
 	@Test
 	void repositoryManagerCanAddAPackageToARepository() {
-		repositoryManager.registerRepositoryService(repoOneName, repoOneService);
+		repositoryManager.registerRepository(repoOneName, repoOneClient);
 		repositoryManager.setUser(testUser);
 		repositoryManager.setDepositPath(depositPath);
 		repositoryManager.setStagingPath(stagingPath);
@@ -119,7 +119,7 @@ class ReplicaExperimentApplicationTests {
 		assertEquals(1, infoPackageA.getReplicas().size());
 		assertTrue(infoPackageA.hasAReplicaIn(repoOneName));
 
-		List<String> filePaths = repoOneService.getFilePaths(depositAIdentifier);
+		List<String> filePaths = repoOneClient.getFilePaths(depositAIdentifier);
 		for (String filePath: filePaths) {
 			Path fullPath = repoOneStoragePath.resolve(filePath);
 			assertTrue(Files.exists(fullPath));
@@ -128,8 +128,8 @@ class ReplicaExperimentApplicationTests {
 
 	@Test
 	void repositoryManagerCanReplicateAPackageToAnotherRepository() {
-		repositoryManager.registerRepositoryService(repoOneName, repoOneService);
-		repositoryManager.registerRepositoryService(repoTwoName, repoTwoService);
+		repositoryManager.registerRepository(repoOneName, repoOneClient);
+		repositoryManager.registerRepository(repoTwoName, repoTwoClient);
 		repositoryManager.setUser(testUser);
 		repositoryManager.setDepositPath(depositPath);
 		repositoryManager.setStagingPath(stagingPath);
@@ -152,7 +152,7 @@ class ReplicaExperimentApplicationTests {
 			assertEquals(depositAIdentifier, repoTwoReplica.getInfoPackage().getIdentifier());
 		}
 
-		List<String> filePaths = repoTwoService.getFilePaths(depositAIdentifier);
+		List<String> filePaths = repoTwoClient.getFilePaths(depositAIdentifier);
 		for (String filePath: filePaths) {
 			Path fullPath = repoTwoStoragePath.resolve(filePath);
 			assertTrue(Files.exists(fullPath));
