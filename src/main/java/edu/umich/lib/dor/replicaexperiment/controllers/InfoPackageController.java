@@ -43,6 +43,19 @@ public class InfoPackageController {
         return new InfoPackageDto(newInfoPackage);
     }
 
+    @GetMapping(path="/replicate")
+    public @ResponseBody InfoPackageDto replicatePackageToRepository(
+        @RequestParam String identifier,
+        @RequestParam String sourceRepository,
+        @RequestParam String targetRepository
+    ) {
+        repositoryManager.replicatePackageToAnotherRepository(
+            identifier, sourceRepository, targetRepository
+        );
+        var newInfoPackage = repositoryManager.getInfoPackage(identifier);
+        return new InfoPackageDto(newInfoPackage);
+    }
+
     @GetMapping(path="/all")
     public @ResponseBody Iterable<InfoPackageDto> getAllInfoPackages() {
         List<InfoPackage> infoPackages = infoPackageRepository.findAll();
