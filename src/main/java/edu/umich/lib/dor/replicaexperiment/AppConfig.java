@@ -3,6 +3,7 @@ package edu.umich.lib.dor.replicaexperiment;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -10,11 +11,11 @@ import org.springframework.core.env.Environment;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
-import edu.umich.lib.dor.replicaexperiment.domain.InfoPackageRepository;
-import edu.umich.lib.dor.replicaexperiment.domain.ReplicaRepository;
-import edu.umich.lib.dor.replicaexperiment.domain.RepositoryRepository;
+import edu.umich.lib.dor.replicaexperiment.service.InfoPackageService;
 import edu.umich.lib.dor.replicaexperiment.service.OcflFilesystemRepositoryClient;
+import edu.umich.lib.dor.replicaexperiment.service.ReplicaService;
 import edu.umich.lib.dor.replicaexperiment.service.RepositoryManager;
+import edu.umich.lib.dor.replicaexperiment.service.RepositoryService;
 import edu.umich.lib.dor.replicaexperiment.service.RepositoryClient;
 
 @Configuration
@@ -22,12 +23,21 @@ import edu.umich.lib.dor.replicaexperiment.service.RepositoryClient;
 @EnableTransactionManagement
 @EnableJpaRepositories(basePackages="edu.umich.lib.dor.replicaexperiment.domain")
 public class AppConfig {
-    @Bean
+	@Autowired
+	RepositoryService repositoryService;
+
+	@Autowired
+	InfoPackageService infoPackageService;
+
+	@Autowired
+	ReplicaService replicaService;
+
+	@Bean
 	public RepositoryManager repositoryManager(
-		RepositoryRepository repositoryRepository,
-		InfoPackageRepository infoPackageRepository,
-		ReplicaRepository replicaRepository,
-        Environment environment
+		RepositoryService repositoryService,
+		InfoPackageService infoPackageService,
+		ReplicaService replicaService,
+		Environment environment
 	) {
         Path repoOnePath = Paths.get(
 			environment.getRequiredProperty("repository.repo_one.path")
@@ -57,9 +67,9 @@ public class AppConfig {
 		);
 
 		RepositoryManager manager = new RepositoryManager(
-			repositoryRepository,
-			infoPackageRepository,
-			replicaRepository
+			repositoryService,
+			infoPackageService,
+			replicaService
 		);
 		manager.setDepositPath(depositPath);
         manager.setStagingPath(stagingPath);

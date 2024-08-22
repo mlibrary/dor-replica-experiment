@@ -27,8 +27,10 @@ import edu.umich.lib.dor.replicaexperiment.domain.InfoPackage;
 import edu.umich.lib.dor.replicaexperiment.domain.Replica;
 import edu.umich.lib.dor.replicaexperiment.domain.Repository;
 import edu.umich.lib.dor.replicaexperiment.domain.User;
+import edu.umich.lib.dor.replicaexperiment.service.InfoPackageService;
 import edu.umich.lib.dor.replicaexperiment.service.OcflFilesystemRepositoryClient;
 import edu.umich.lib.dor.replicaexperiment.service.RepositoryManager;
+import edu.umich.lib.dor.replicaexperiment.service.RepositoryService;
 import edu.umich.lib.dor.replicaexperiment.service.RepositoryClient;
 
 @Import(TestcontainersConfiguration.class)
@@ -61,6 +63,12 @@ class ReplicaExperimentApplicationTests {
 
 	@Autowired
 	private RepositoryManager repositoryManager;
+
+	@Autowired
+	private InfoPackageService infoPackageService;
+
+	@Autowired
+	private RepositoryService repositoryService;
 
 	private RepositoryClient repoOneClient;
 	private RepositoryClient repoTwoClient;
@@ -108,8 +116,8 @@ class ReplicaExperimentApplicationTests {
 			depositAIdentifier, depositAPath, repoOneName, "first version!!!"
 		);
 
-		InfoPackage infoPackageA = repositoryManager.getInfoPackage(depositAIdentifier);
-		Repository repository = repositoryManager.getRepository(repoOneName);
+		InfoPackage infoPackageA = infoPackageService.getInfoPackage(depositAIdentifier);
+		Repository repository = repositoryService.getRepository(repoOneName);
 
 		assertEquals("A", infoPackageA.getIdentifier());
 
@@ -142,9 +150,9 @@ class ReplicaExperimentApplicationTests {
 			depositAIdentifier, repoOneName, repoTwoName
 		);
 
-		InfoPackage infoPackage = repositoryManager.getInfoPackage(depositAIdentifier);
+		InfoPackage infoPackage = infoPackageService.getInfoPackage(depositAIdentifier);
 		assertEquals(2, infoPackage.getNumReplicas());
-		Repository repositoryTwo = repositoryManager.getRepository(repoTwoName);
+		Repository repositoryTwo = repositoryService.getRepository(repoTwoName);
 		var replicasInRepoTwo = repositoryTwo.getReplicas();
 		assertEquals(1, replicasInRepoTwo.size());
 		if (replicasInRepoTwo.size() == 1) {

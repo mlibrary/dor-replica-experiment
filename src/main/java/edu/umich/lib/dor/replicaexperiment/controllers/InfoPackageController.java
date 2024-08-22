@@ -15,8 +15,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import edu.umich.lib.dor.replicaexperiment.controllers.dtos.InfoPackageDto;
 import edu.umich.lib.dor.replicaexperiment.domain.InfoPackage;
-import edu.umich.lib.dor.replicaexperiment.domain.InfoPackageRepository;
 import edu.umich.lib.dor.replicaexperiment.domain.User;
+import edu.umich.lib.dor.replicaexperiment.service.InfoPackageService;
 import edu.umich.lib.dor.replicaexperiment.service.RepositoryManager;
 
 @Controller
@@ -25,7 +25,7 @@ public class InfoPackageController {
     User testUser = new User("test", "test@example.edu");
 
     @Autowired
-    private InfoPackageRepository infoPackageRepository;
+    private InfoPackageService infoPackageService;
 
     @Autowired
     private RepositoryManager repositoryManager;
@@ -42,7 +42,7 @@ public class InfoPackageController {
         repositoryManager.addPackageToRepository(
             identifier, sourcePathRelativeToDeposit, repository, message
         );
-        var newInfoPackage = repositoryManager.getInfoPackage(identifier);
+        var newInfoPackage = infoPackageService.getInfoPackage(identifier);
         return new InfoPackageDto(newInfoPackage);
     }
 
@@ -56,13 +56,13 @@ public class InfoPackageController {
         repositoryManager.replicatePackageToAnotherRepository(
             identifier, sourceRepository, targetRepository
         );
-        var newInfoPackage = repositoryManager.getInfoPackage(identifier);
+        var newInfoPackage = infoPackageService.getInfoPackage(identifier);
         return new InfoPackageDto(newInfoPackage);
     }
 
     @GetMapping(path="/all")
     public @ResponseBody Iterable<InfoPackageDto> getAllInfoPackages() {
-        List<InfoPackage> infoPackages = infoPackageRepository.findAll();
+        List<InfoPackage> infoPackages = infoPackageService.getAllInfoPackages();
         return infoPackages
             .stream()
             .map(infoPackage -> { return new InfoPackageDto(infoPackage); })

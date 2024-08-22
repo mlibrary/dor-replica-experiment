@@ -6,39 +6,32 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import edu.umich.lib.dor.replicaexperiment.domain.InfoPackage;
-import edu.umich.lib.dor.replicaexperiment.domain.InfoPackageRepository;
 import edu.umich.lib.dor.replicaexperiment.domain.Replica;
-import edu.umich.lib.dor.replicaexperiment.domain.ReplicaRepository;
 import edu.umich.lib.dor.replicaexperiment.domain.Repository;
-import edu.umich.lib.dor.replicaexperiment.domain.RepositoryRepository;
-import edu.umich.lib.dor.replicaexperiment.domain.RepositoryType;
 import edu.umich.lib.dor.replicaexperiment.domain.User;
 
-@Service
 public class RepositoryManager {
 	private static final Log log = LogFactory.getLog(RepositoryManager.class);
 
-    RepositoryRepository repositoryRepo;
-    ReplicaRepository replicaRepo;
-    InfoPackageRepository infoPackageRepo;
+    RepositoryService repositoryService;
+    InfoPackageService infoPackageService;
+    ReplicaService replicaService;
+
     User user;
     Path depositPath;
     Path stagingPath;
     HashMap<String, RepositoryClient> clientMap = new HashMap<>();
 
-    @Autowired
     public RepositoryManager(
-        RepositoryRepository repositoryRepo,
-        InfoPackageRepository infoPackageRepo,
-        ReplicaRepository replicaRepo
+        RepositoryService repositoryService,
+        InfoPackageService infoPackageService,
+        ReplicaService replicaService
     ) {
-        this.repositoryRepo = repositoryRepo;
-        this.infoPackageRepo = infoPackageRepo;
-        this.replicaRepo = replicaRepo;
+        this.repositoryService = repositoryService;
+        this.infoPackageService = infoPackageService;
+        this.replicaService = replicaService;
     }
 
     public void setUser(User user) {
@@ -74,52 +67,9 @@ public class RepositoryManager {
         return depositPath;
     }
 
-    private Repository createRepositoryIfNotExists(String name) {
-        Repository repository = repositoryRepo.findByName(name);
-        if (repository != null) {
-            return repository;
-        }
-        log.debug(
-            String.format("Creating new repository record in database with name \"%s\"", name)
-        );
-        var newRepository = new Repository(name, RepositoryType.FILE_SYSTEM);
-        repositoryRepo.save(newRepository);
-        return newRepository;
-    }
-
-    public Repository getRepository(String name) {
-        return repositoryRepo.findByName(name);
-    }
-
-    private InfoPackage createInfoPackage(String identifier) {
-        var infoPackage = new InfoPackage(identifier);
-        infoPackageRepo.save(infoPackage);
-        return infoPackage;
-    }
-
-    public InfoPackage getInfoPackage(String identifier) {
-        InfoPackage infoPackage = infoPackageRepo.findByIdentifier(identifier);
-        return infoPackage;
-    }
-
-    private void createReplica(InfoPackage infoPackage, Repository repository) {
-        var replica = new Replica();
-        replica.setInfoPackage(infoPackage);
-        replica.setRepository(repository);
-        replicaRepo.save(replica);
-        infoPackage.addReplica(replica);
-        infoPackageRepo.save(infoPackage);
-        repository.addReplica(replica);
-        repositoryRepo.save(repository);
-    }
-
-    public List<Replica> getReplicas() {
-        return replicaRepo.findAll();
-    }
-
     public void registerRepository(String name, RepositoryClient client) {
         clientMap.put(name, client);
-        createRepositoryIfNotExists(name);
+        repositoryService.getOrCreateRepository(name);
     }
 
     public List<String> listRepositories(){
@@ -161,13 +111,15 @@ public class RepositoryManager {
         String packageIdentifier, Path sourcePath, String repositoryName, String message
     ) {
         Path fullSourcePath = getDepositPath().resolve(sourcePath);
-        var repository = repositoryRepo.findByName(repositoryName);
-        createInfoPackage(packageIdentifier);
-        var infoPackage = infoPackageRepo.findByIdentifier(packageIdentifier);
+        var repository = repositoryService.getRepository(repositoryName);
+        infoPackageService.createInfoPackage(packageIdentifier);
+        var infoPackage = infoPackageService.getInfoPackage(packageIdentifier);
 
         var ocflRepoClient = getRepositoryClient(repositoryName);
         ocflRepoClient.createObject(packageIdentifier, fullSourcePath, getUser(), message);
-        createReplica(infoPackage, repository);
+        Replica replica = replicaService.createReplica(infoPackage, repository);
+        infoPackage.addReplica(replica);
+        repository.addReplica(replica);
     }
 
     public void replicatePackageToAnotherRepository(
@@ -180,8 +132,10 @@ public class RepositoryManager {
 
         sourceRepoClient.exportObject(packageIdentifier, objectPathInStaging);
         targetRepoClient.importObject(objectPathInStaging);
-        InfoPackage infoPackage = infoPackageRepo.findByIdentifier(packageIdentifier);
-        Repository repository = repositoryRepo.findByName(targetRepoName);
-        createReplica(infoPackage, repository);
+        InfoPackage infoPackage = infoPackageService.getInfoPackage(packageIdentifier);
+        Repository repository = repositoryService.getRepository(targetRepoName);
+        Replica replica = replicaService.createReplica(infoPackage, repository);
+        infoPackage.addReplica(replica);
+        repository.addReplica(replica);
     };
 }
