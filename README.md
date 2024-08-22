@@ -12,10 +12,23 @@ Packages, replicas (copies), and repositories are recorded in a MySQL database.
 - Java 21
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/)
 
+### Usage
+
+For demo usage, all configuration and setup should be handled for you.
+There will be two configured repositories, `repo_one` and `repo_two`.
+The following command will start up a Web application.
+
+```sh
+./gradlew bootRun
+```
+
+The application has OpenAPI and Swagger UI support. Once the application has started,
+visit http://localhost:8080/swagger-ui/index.html to review
+and use the available routes.
+
 ### Testing
 
 ```sh
-# For Mac OS/Linux?
 ./gradlew test
 ```
 
