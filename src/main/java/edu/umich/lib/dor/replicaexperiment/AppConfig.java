@@ -42,7 +42,6 @@ public class AppConfig {
 		String repoOneName = "repo_one";
 		Path repoOneStoragePath = repoOnePath.resolve("storage");
 		Path repoOneWorkspacePath = repoOnePath.resolve("workspace");
-		Path repoOneDepositPath = repoOnePath.resolve("deposit");
 		RepositoryService repoOneService = new OcflFilesystemRepositoryService(
 			repoOneStoragePath, repoOneWorkspacePath
 		);
