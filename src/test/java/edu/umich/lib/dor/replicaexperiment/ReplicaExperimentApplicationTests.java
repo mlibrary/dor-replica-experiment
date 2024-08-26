@@ -10,6 +10,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +29,10 @@ import edu.umich.lib.dor.replicaexperiment.domain.InfoPackage;
 import edu.umich.lib.dor.replicaexperiment.domain.Replica;
 import edu.umich.lib.dor.replicaexperiment.domain.Repository;
 import edu.umich.lib.dor.replicaexperiment.domain.User;
+import edu.umich.lib.dor.replicaexperiment.exception.EntityAlreadyExistsException;
+import edu.umich.lib.dor.replicaexperiment.exception.NoContentException;
+import edu.umich.lib.dor.replicaexperiment.exception.NoEntityException;
+import edu.umich.lib.dor.replicaexperiment.exception.RepositoryNotRegisteredException;
 import edu.umich.lib.dor.replicaexperiment.service.InfoPackageService;
 import edu.umich.lib.dor.replicaexperiment.service.OcflFilesystemRepositoryClient;
 import edu.umich.lib.dor.replicaexperiment.service.RepositoryClient;
@@ -98,6 +104,12 @@ class ReplicaExperimentApplicationTests {
 		this.repoTwoClient = new OcflFilesystemRepositoryClient(
 			repoTwoStoragePath, repoTwoWorkspacePath
 		);
+		repositoryManager.registerRepository(repoOneName, repoOneClient);
+		repositoryManager.registerRepository(repoTwoName, repoTwoClient);
+		repositoryManager.setUser(testUser);
+		repositoryManager.setDepositPath(depositPath);
+		repositoryManager.setStagingPath(stagingPath);
+		log.debug(repositoryManager);
 	}
 
 	@Test
@@ -106,12 +118,6 @@ class ReplicaExperimentApplicationTests {
 
 	@Test
 	void repositoryManagerCanAddAPackageToARepository() {
-		repositoryManager.registerRepository(repoOneName, repoOneClient);
-		repositoryManager.setUser(testUser);
-		repositoryManager.setDepositPath(depositPath);
-		repositoryManager.setStagingPath(stagingPath);
-		log.debug(repositoryManager);
-
 		repositoryManager.addPackageToRepository(
 			depositAIdentifier, depositAPath, repoOneName, "first version!!!"
 		);
@@ -135,14 +141,46 @@ class ReplicaExperimentApplicationTests {
 	}
 
 	@Test
-	void repositoryManagerCanReplicateAPackageToAnotherRepository() {
-		repositoryManager.registerRepository(repoOneName, repoOneClient);
-		repositoryManager.registerRepository(repoTwoName, repoTwoClient);
-		repositoryManager.setUser(testUser);
-		repositoryManager.setDepositPath(depositPath);
-		repositoryManager.setStagingPath(stagingPath);
-		log.debug(repositoryManager);
+	void repositoryManagerThrowsExceptionDuringAdditionIfRepositoryDoesNotExist() {
+		assertThrows(NoEntityException.class, () -> {
+			repositoryManager.addPackageToRepository(
+				"something",
+				Paths.get("some/thing"),
+				"repo_three",
+				"was there a repo_three?"
+			);
+		});
+	}
 
+	@Test
+	void repositoryManagerThrowsExceptionDuringAdditionIfPackageExists() {
+		repositoryManager.addPackageToRepository(
+			depositAIdentifier, depositAPath, repoOneName, "first version!!!"
+		);
+		assertThrows(EntityAlreadyExistsException.class, () -> {
+			repositoryManager.addPackageToRepository(
+				depositAIdentifier,
+				depositAPath,
+				repoOneName,
+				"did I already add this?"
+			);
+		});
+	}
+
+	@Test
+	void repositoryManagerThrowsExceptionDuringAdditionIfDepositContentIsNotPresent() {
+		assertThrows(NoContentException.class, () -> {
+			repositoryManager.addPackageToRepository(
+				"B",
+				Paths.get("B"),
+				"repo_one",
+				"did I forget to put content at the deposit path?"
+			);
+		});
+	}
+
+	@Test
+	void repositoryManagerCanReplicateAPackageToAnotherRepository() {
 		repositoryManager.addPackageToRepository(
 			depositAIdentifier, depositAPath, repoOneName, "first version!!!"
 		);
@@ -165,5 +203,23 @@ class ReplicaExperimentApplicationTests {
 			Path fullPath = repoTwoStoragePath.resolve(filePath);
 			assertTrue(Files.exists(fullPath));
 		}
+	}
+
+	@Test
+	void repositoryManagerThrowsExceptionDuringReplicationIfRepositoryNotRegistered() {
+		assertThrows(RepositoryNotRegisteredException.class, () -> {
+			repositoryManager.replicatePackageToAnotherRepository(
+				depositAIdentifier, repoOneName, "repo_three"
+			);
+		});
+	}
+
+	@Test
+	void repositoryManagerThrowsExceptionDuringReplicationIfPackageDoesNotExist() {
+		assertThrows(NoEntityException.class, () -> {
+			repositoryManager.replicatePackageToAnotherRepository(
+				"B", repoOneName, repoTwoName
+			);
+		});
 	}
 }

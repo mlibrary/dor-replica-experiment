@@ -11,6 +11,9 @@ import edu.umich.lib.dor.replicaexperiment.domain.InfoPackage;
 import edu.umich.lib.dor.replicaexperiment.domain.Replica;
 import edu.umich.lib.dor.replicaexperiment.domain.Repository;
 import edu.umich.lib.dor.replicaexperiment.domain.User;
+import edu.umich.lib.dor.replicaexperiment.exception.EntityAlreadyExistsException;
+import edu.umich.lib.dor.replicaexperiment.exception.NoEntityException;
+import edu.umich.lib.dor.replicaexperiment.exception.RepositoryNotRegisteredException;
 
 public class RepositoryManager {
 	private static final Log log = LogFactory.getLog(RepositoryManager.class);
@@ -81,7 +84,7 @@ public class RepositoryManager {
     private RepositoryClient getRepositoryClient(String name) {
         RepositoryClient client = clientMap.get(name);
         if (client == null) {
-            throw new IllegalArgumentException(
+            throw new RepositoryNotRegisteredException(
                 String.format("\"%s\" is not a registered repository.", name)
             );
         }
@@ -110,13 +113,31 @@ public class RepositoryManager {
     public void addPackageToRepository(
         String packageIdentifier, Path sourcePath, String repositoryName, String message
     ) {
-        Path fullSourcePath = getDepositPath().resolve(sourcePath);
-        var repository = repositoryService.getRepository(repositoryName);
-        infoPackageService.createInfoPackage(packageIdentifier);
-        var infoPackage = infoPackageService.getInfoPackage(packageIdentifier);
+        var existingPackage = infoPackageService.getInfoPackage(packageIdentifier);
+        if (existingPackage != null) {
+            throw new EntityAlreadyExistsException(
+                String.format(
+                    "A package with identifier \"%s\" already exists",
+                    packageIdentifier
+                )
+            );
+        }
 
+        var repository = repositoryService.getRepository(repositoryName);
+        if (repository == null) {
+            throw new NoEntityException(
+                String.format(
+                    "No repository with name \"%s\" was found.",
+                    repositoryName
+                )
+            );
+        }
+
+        Path fullSourcePath = getDepositPath().resolve(sourcePath);
         var ocflRepoClient = getRepositoryClient(repositoryName);
         ocflRepoClient.createObject(packageIdentifier, fullSourcePath, getUser(), message);
+
+        var infoPackage = infoPackageService.createInfoPackage(packageIdentifier);
         Replica replica = replicaService.createReplica(infoPackage, repository);
         infoPackage.addReplica(replica);
         repository.addReplica(replica);
@@ -127,12 +148,21 @@ public class RepositoryManager {
     ) {
         Path stagingPath = getStagingPath();
         Path objectPathInStaging = stagingPath.resolve(packageIdentifier);
+
         RepositoryClient sourceRepoClient = getRepositoryClient(sourceRepoName);
         RepositoryClient targetRepoClient = getRepositoryClient(targetRepoName);
+        InfoPackage infoPackage = infoPackageService.getInfoPackage(packageIdentifier);
+        if (infoPackage == null) {
+            throw new NoEntityException(
+                String.format(
+                    "No packaged with identifier \"%s\" was found.",
+                    packageIdentifier
+                )
+            );
+        }
 
         sourceRepoClient.exportObject(packageIdentifier, objectPathInStaging);
         targetRepoClient.importObject(objectPathInStaging);
-        InfoPackage infoPackage = infoPackageService.getInfoPackage(packageIdentifier);
         Repository repository = repositoryService.getRepository(targetRepoName);
         Replica replica = replicaService.createReplica(infoPackage, repository);
         infoPackage.addReplica(replica);
