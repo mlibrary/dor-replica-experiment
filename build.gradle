@@ -18,7 +18,7 @@ repositories {
 }
 
 test {
-  testLogging.showStandardStreams = true
+	testLogging.showStandardStreams = true
 }
 
 dependencies {

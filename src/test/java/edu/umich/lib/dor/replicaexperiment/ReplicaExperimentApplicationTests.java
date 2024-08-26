@@ -106,7 +106,6 @@ class ReplicaExperimentApplicationTests {
 		);
 		repositoryManager.registerRepository(repoOneName, repoOneClient);
 		repositoryManager.registerRepository(repoTwoName, repoTwoClient);
-		repositoryManager.setUser(testUser);
 		repositoryManager.setDepositPath(depositPath);
 		repositoryManager.setStagingPath(stagingPath);
 		log.debug(repositoryManager);
@@ -119,7 +118,7 @@ class ReplicaExperimentApplicationTests {
 	@Test
 	void repositoryManagerCanAddAPackageToARepository() {
 		repositoryManager.addPackageToRepository(
-			depositAIdentifier, depositAPath, repoOneName, "first version!!!"
+			testUser, depositAIdentifier, depositAPath, repoOneName, "first version!!!"
 		);
 
 		InfoPackage infoPackageA = infoPackageService.getInfoPackage(depositAIdentifier);
@@ -144,6 +143,7 @@ class ReplicaExperimentApplicationTests {
 	void repositoryManagerThrowsExceptionDuringAdditionIfRepositoryDoesNotExist() {
 		assertThrows(NoEntityException.class, () -> {
 			repositoryManager.addPackageToRepository(
+				testUser,
 				"something",
 				Paths.get("some/thing"),
 				"repo_three",
@@ -155,10 +155,11 @@ class ReplicaExperimentApplicationTests {
 	@Test
 	void repositoryManagerThrowsExceptionDuringAdditionIfPackageExists() {
 		repositoryManager.addPackageToRepository(
-			depositAIdentifier, depositAPath, repoOneName, "first version!!!"
+			testUser, depositAIdentifier, depositAPath, repoOneName, "first version!!!"
 		);
 		assertThrows(EntityAlreadyExistsException.class, () -> {
 			repositoryManager.addPackageToRepository(
+				testUser,
 				depositAIdentifier,
 				depositAPath,
 				repoOneName,
@@ -171,6 +172,7 @@ class ReplicaExperimentApplicationTests {
 	void repositoryManagerThrowsExceptionDuringAdditionIfDepositContentIsNotPresent() {
 		assertThrows(NoContentException.class, () -> {
 			repositoryManager.addPackageToRepository(
+				testUser,
 				"B",
 				Paths.get("B"),
 				"repo_one",
@@ -182,10 +184,10 @@ class ReplicaExperimentApplicationTests {
 	@Test
 	void repositoryManagerCanReplicateAPackageToAnotherRepository() {
 		repositoryManager.addPackageToRepository(
-			depositAIdentifier, depositAPath, repoOneName, "first version!!!"
+			testUser, depositAIdentifier, depositAPath, repoOneName, "first version!!!"
 		);
 		repositoryManager.replicatePackageToAnotherRepository(
-			depositAIdentifier, repoOneName, repoTwoName
+			testUser, depositAIdentifier, repoOneName, repoTwoName
 		);
 
 		InfoPackage infoPackage = infoPackageService.getInfoPackage(depositAIdentifier);
@@ -209,7 +211,7 @@ class ReplicaExperimentApplicationTests {
 	void repositoryManagerThrowsExceptionDuringReplicationIfRepositoryNotRegistered() {
 		assertThrows(RepositoryNotRegisteredException.class, () -> {
 			repositoryManager.replicatePackageToAnotherRepository(
-				depositAIdentifier, repoOneName, "repo_three"
+				testUser, depositAIdentifier, repoOneName, "repo_three"
 			);
 		});
 	}
@@ -218,7 +220,7 @@ class ReplicaExperimentApplicationTests {
 	void repositoryManagerThrowsExceptionDuringReplicationIfPackageDoesNotExist() {
 		assertThrows(NoEntityException.class, () -> {
 			repositoryManager.replicatePackageToAnotherRepository(
-				"B", repoOneName, repoTwoName
+				testUser, "B", repoOneName, repoTwoName
 			);
 		});
 	}

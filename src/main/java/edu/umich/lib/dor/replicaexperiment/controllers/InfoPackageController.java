@@ -38,9 +38,8 @@ public class InfoPackageController {
         @RequestParam String message
     ) {
         Path sourcePathRelativeToDeposit = Paths.get(depositSourcePath);
-        repositoryManager.setUser(testUser);
         repositoryManager.addPackageToRepository(
-            identifier, sourcePathRelativeToDeposit, repository, message
+            testUser, identifier, sourcePathRelativeToDeposit, repository, message
         );
         var newInfoPackage = infoPackageService.getInfoPackage(identifier);
         return new InfoPackageDto(newInfoPackage);
@@ -52,9 +51,8 @@ public class InfoPackageController {
         @RequestParam String sourceRepository,
         @RequestParam String targetRepository
     ) {
-        repositoryManager.setUser(testUser);
         repositoryManager.replicatePackageToAnotherRepository(
-            identifier, sourceRepository, targetRepository
+            testUser, identifier, sourceRepository, targetRepository
         );
         var newInfoPackage = infoPackageService.getInfoPackage(identifier);
         return new InfoPackageDto(newInfoPackage);

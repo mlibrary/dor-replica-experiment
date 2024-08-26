@@ -22,7 +22,6 @@ public class RepositoryManager {
     InfoPackageService infoPackageService;
     ReplicaService replicaService;
 
-    User user;
     Path depositPath;
     Path stagingPath;
     HashMap<String, RepositoryClient> clientMap = new HashMap<>();
@@ -35,17 +34,6 @@ public class RepositoryManager {
         this.repositoryService = repositoryService;
         this.infoPackageService = infoPackageService;
         this.replicaService = replicaService;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
-    }
-
-    private User getUser() {
-        if (user == null) {
-            throw new IllegalArgumentException("user must be set.");
-        }
-        return user;
     }
 
     public void setStagingPath(Path stagingPath) {
@@ -98,20 +86,22 @@ public class RepositoryManager {
             (
                 "RepositoryManager[" +
                 "repositories=[%s], " +
-                "user=%s, " +
                 "depositPath=%s, " +
                 "stagingPath=%s" +
                 "]"
             ),
             String.join(", ", repoClientNames),
-            user == null ? "null" : user.toString(),
             depositPath == null ? "null" : depositPath.toString(),
             stagingPath == null ? "null" : stagingPath.toString()
         );
     }
 
     public void addPackageToRepository(
-        String packageIdentifier, Path sourcePath, String repositoryName, String message
+        User user,
+        String packageIdentifier,
+        Path sourcePath,
+        String repositoryName,
+        String message
     ) {
         var existingPackage = infoPackageService.getInfoPackage(packageIdentifier);
         if (existingPackage != null) {
@@ -135,7 +125,7 @@ public class RepositoryManager {
 
         Path fullSourcePath = getDepositPath().resolve(sourcePath);
         var ocflRepoClient = getRepositoryClient(repositoryName);
-        ocflRepoClient.createObject(packageIdentifier, fullSourcePath, getUser(), message);
+        ocflRepoClient.createObject(packageIdentifier, fullSourcePath, user, message);
 
         var infoPackage = infoPackageService.createInfoPackage(packageIdentifier);
         Replica replica = replicaService.createReplica(infoPackage, repository);
@@ -144,7 +134,7 @@ public class RepositoryManager {
     }
 
     public void replicatePackageToAnotherRepository(
-        String packageIdentifier, String sourceRepoName, String targetRepoName
+        User user, String packageIdentifier, String sourceRepoName, String targetRepoName
     ) {
         Path stagingPath = getStagingPath();
         Path objectPathInStaging = stagingPath.resolve(packageIdentifier);
