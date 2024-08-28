@@ -15,6 +15,7 @@ import edu.umich.lib.dor.replicaexperiment.service.InfoPackageService;
 import edu.umich.lib.dor.replicaexperiment.service.OcflFilesystemRepositoryClient;
 import edu.umich.lib.dor.replicaexperiment.service.ReplicaService;
 import edu.umich.lib.dor.replicaexperiment.service.RepositoryClient;
+import edu.umich.lib.dor.replicaexperiment.service.RepositoryClientRegistry;
 import edu.umich.lib.dor.replicaexperiment.service.RepositoryManager;
 import edu.umich.lib.dor.replicaexperiment.service.RepositoryService;
 
@@ -66,15 +67,20 @@ public class AppConfig {
 			repoTwoStoragePath, repoTwoWorkspacePath
 		);
 
+		RepositoryClientRegistry repositoryClientRegistry = new RepositoryClientRegistry();
+		repositoryClientRegistry.register(repoOneName, repoOneClient);
+		repositoryClientRegistry.register(repoTwoName, repoTwoClient);
+		for (String repositoryName: repositoryClientRegistry.listClients()) {
+            this.repositoryService.getOrCreateRepository(repositoryName);
+		}
 		RepositoryManager manager = new RepositoryManager(
 			repositoryService,
 			infoPackageService,
-			replicaService
+			replicaService,
+			repositoryClientRegistry
 		);
 		manager.setDepositPath(depositPath);
         manager.setStagingPath(stagingPath);
-		manager.registerRepository(repoOneName, repoOneClient);
-		manager.registerRepository(repoTwoName, repoTwoClient);
         return manager;
 	}
 }

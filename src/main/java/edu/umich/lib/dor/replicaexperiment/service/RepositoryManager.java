@@ -1,7 +1,6 @@
 package edu.umich.lib.dor.replicaexperiment.service;
 
 import java.nio.file.Path;
-import java.util.HashMap;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -13,7 +12,6 @@ import edu.umich.lib.dor.replicaexperiment.domain.Repository;
 import edu.umich.lib.dor.replicaexperiment.domain.User;
 import edu.umich.lib.dor.replicaexperiment.exception.EntityAlreadyExistsException;
 import edu.umich.lib.dor.replicaexperiment.exception.NoEntityException;
-import edu.umich.lib.dor.replicaexperiment.exception.RepositoryNotRegisteredException;
 
 public class RepositoryManager {
 	private static final Log log = LogFactory.getLog(RepositoryManager.class);
@@ -24,16 +22,18 @@ public class RepositoryManager {
 
     Path depositPath;
     Path stagingPath;
-    HashMap<String, RepositoryClient> clientMap = new HashMap<>();
+    RepositoryClientRegistry clientRegistry;
 
     public RepositoryManager(
         RepositoryService repositoryService,
         InfoPackageService infoPackageService,
-        ReplicaService replicaService
+        ReplicaService replicaService,
+        RepositoryClientRegistry repositoryClientRegistry
     ) {
         this.repositoryService = repositoryService;
         this.infoPackageService = infoPackageService;
         this.replicaService = replicaService;
+        this.clientRegistry = repositoryClientRegistry;
     }
 
     public void setStagingPath(Path stagingPath) {
@@ -58,30 +58,9 @@ public class RepositoryManager {
         return depositPath;
     }
 
-    public void registerRepository(String name, RepositoryClient client) {
-        clientMap.put(name, client);
-        repositoryService.getOrCreateRepository(name);
-    }
-
-    public List<String> listRepositories(){
-        return clientMap.keySet()
-            .stream()
-            .toList();
-    }
-
-    private RepositoryClient getRepositoryClient(String name) {
-        RepositoryClient client = clientMap.get(name);
-        if (client == null) {
-            throw new RepositoryNotRegisteredException(
-                String.format("\"%s\" is not a registered repository.", name)
-            );
-        }
-        return client;
-    }
-
     @Override
     public String toString() {
-        List<String> repoClientNames = listRepositories();
+        List<String> repoClientNames = clientRegistry.listClients();
         return String.format(
             (
                 "RepositoryManager[" +
@@ -124,7 +103,7 @@ public class RepositoryManager {
         }
 
         Path fullSourcePath = getDepositPath().resolve(sourcePath);
-        var ocflRepoClient = getRepositoryClient(repositoryName);
+        var ocflRepoClient = clientRegistry.getClient(repositoryName);
         ocflRepoClient.createObject(packageIdentifier, fullSourcePath, user, message);
 
         var infoPackage = infoPackageService.createInfoPackage(packageIdentifier);
@@ -139,8 +118,8 @@ public class RepositoryManager {
         Path stagingPath = getStagingPath();
         Path objectPathInStaging = stagingPath.resolve(packageIdentifier);
 
-        RepositoryClient sourceRepoClient = getRepositoryClient(sourceRepoName);
-        RepositoryClient targetRepoClient = getRepositoryClient(targetRepoName);
+        RepositoryClient sourceRepoClient = clientRegistry.getClient(sourceRepoName);
+        RepositoryClient targetRepoClient = clientRegistry.getClient(targetRepoName);
         InfoPackage infoPackage = infoPackageService.getInfoPackage(packageIdentifier);
         if (infoPackage == null) {
             throw new NoEntityException(

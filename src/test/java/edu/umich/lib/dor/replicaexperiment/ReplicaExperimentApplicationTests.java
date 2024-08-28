@@ -35,7 +35,9 @@ import edu.umich.lib.dor.replicaexperiment.exception.NoEntityException;
 import edu.umich.lib.dor.replicaexperiment.exception.RepositoryNotRegisteredException;
 import edu.umich.lib.dor.replicaexperiment.service.InfoPackageService;
 import edu.umich.lib.dor.replicaexperiment.service.OcflFilesystemRepositoryClient;
+import edu.umich.lib.dor.replicaexperiment.service.ReplicaService;
 import edu.umich.lib.dor.replicaexperiment.service.RepositoryClient;
+import edu.umich.lib.dor.replicaexperiment.service.RepositoryClientRegistry;
 import edu.umich.lib.dor.replicaexperiment.service.RepositoryManager;
 import edu.umich.lib.dor.replicaexperiment.service.RepositoryService;
 
@@ -67,7 +69,6 @@ class ReplicaExperimentApplicationTests {
 
 	User testUser = new User("test", "test@example.edu");
 
-	@Autowired
 	private RepositoryManager repositoryManager;
 
 	@Autowired
@@ -75,6 +76,9 @@ class ReplicaExperimentApplicationTests {
 
 	@Autowired
 	private RepositoryService repositoryService;
+
+	@Autowired
+	ReplicaService replicaService;
 
 	private RepositoryClient repoOneClient;
 	private RepositoryClient repoTwoClient;
@@ -104,8 +108,20 @@ class ReplicaExperimentApplicationTests {
 		this.repoTwoClient = new OcflFilesystemRepositoryClient(
 			repoTwoStoragePath, repoTwoWorkspacePath
 		);
-		repositoryManager.registerRepository(repoOneName, repoOneClient);
-		repositoryManager.registerRepository(repoTwoName, repoTwoClient);
+
+		RepositoryClientRegistry registry = new RepositoryClientRegistry();
+		registry.register(repoOneName, repoOneClient);
+		registry.register(repoTwoName, repoTwoClient);
+		for (String repositoryName: registry.listClients()) {
+            this.repositoryService.getOrCreateRepository(repositoryName);
+		}
+
+		this.repositoryManager = new RepositoryManager(
+			repositoryService,
+			infoPackageService,
+			replicaService,
+			registry
+		);
 		repositoryManager.setDepositPath(depositPath);
 		repositoryManager.setStagingPath(stagingPath);
 		log.debug(repositoryManager);
