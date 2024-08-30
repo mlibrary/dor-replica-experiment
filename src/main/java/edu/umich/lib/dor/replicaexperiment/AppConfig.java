@@ -25,92 +25,92 @@ import edu.umich.lib.dor.replicaexperiment.service.RepositoryService;
 @EnableTransactionManagement
 @EnableJpaRepositories(basePackages="edu.umich.lib.dor.replicaexperiment.domain")
 public class AppConfig {
-	@Autowired
-	RepositoryService repositoryService;
+    @Autowired
+    RepositoryService repositoryService;
 
-	@Autowired
-	InfoPackageService infoPackageService;
+    @Autowired
+    InfoPackageService infoPackageService;
 
-	@Autowired
-	ReplicaService replicaService;
+    @Autowired
+    ReplicaService replicaService;
 
-	@Bean
-	RepositoryClientRegistry repositoryClientRegistry(
-		RepositoryService repositoryService,
-		Environment environment
-	) {
-		Path repoOnePath = Paths.get(
-			environment.getRequiredProperty("repository.repo_one.path")
-		);
-		Path repoTwoPath = Paths.get(
-			environment.getRequiredProperty("repository.repo_two.path")
-		);
+    @Bean
+    RepositoryClientRegistry repositoryClientRegistry(
+        RepositoryService repositoryService,
+        Environment environment
+    ) {
+        Path repoOnePath = Paths.get(
+            environment.getRequiredProperty("repository.repo_one.path")
+        );
+        Path repoTwoPath = Paths.get(
+            environment.getRequiredProperty("repository.repo_two.path")
+        );
 
-		String repoOneName = "repo_one";
-		Path repoOneStoragePath = repoOnePath.resolve("storage");
-		Path repoOneWorkspacePath = repoOnePath.resolve("workspace");
-		RepositoryClient repoOneClient = new OcflFilesystemRepositoryClient(
-			repoOneStoragePath, repoOneWorkspacePath
-		);
+        String repoOneName = "repo_one";
+        Path repoOneStoragePath = repoOnePath.resolve("storage");
+        Path repoOneWorkspacePath = repoOnePath.resolve("workspace");
+        RepositoryClient repoOneClient = new OcflFilesystemRepositoryClient(
+            repoOneStoragePath, repoOneWorkspacePath
+        );
 
-		String repoTwoName = "repo_two";
-		Path repoTwoStoragePath = repoTwoPath.resolve("storage");
-		Path repoTwoWorkspacePath = repoTwoPath.resolve("workspace");
-		RepositoryClient repoTwoClient = new OcflFilesystemRepositoryClient(
-			repoTwoStoragePath, repoTwoWorkspacePath
-		);
+        String repoTwoName = "repo_two";
+        Path repoTwoStoragePath = repoTwoPath.resolve("storage");
+        Path repoTwoWorkspacePath = repoTwoPath.resolve("workspace");
+        RepositoryClient repoTwoClient = new OcflFilesystemRepositoryClient(
+            repoTwoStoragePath, repoTwoWorkspacePath
+        );
 
-		RepositoryClientRegistry repositoryClientRegistry = new RepositoryClientRegistry();
-		repositoryClientRegistry.register(repoOneName, repoOneClient);
-		repositoryClientRegistry.register(repoTwoName, repoTwoClient);
-		for (String repositoryName: repositoryClientRegistry.listClients()) {
+        RepositoryClientRegistry repositoryClientRegistry = new RepositoryClientRegistry();
+        repositoryClientRegistry.register(repoOneName, repoOneClient);
+        repositoryClientRegistry.register(repoTwoName, repoTwoClient);
+        for (String repositoryName: repositoryClientRegistry.listClients()) {
             this.repositoryService.getOrCreateRepository(repositoryName);
-		}
-		return repositoryClientRegistry;
-	}
+        }
+        return repositoryClientRegistry;
+    }
 
-	@Bean
-	public RepositoryManager repositoryManager(
-		RepositoryClientRegistry repositoryClientRegistry,
-		RepositoryService repositoryService,
-		InfoPackageService infoPackageService,
-		ReplicaService replicaService,
-		Environment environment
-	) {
-		Path depositPath = Paths.get(
-			environment.getRequiredProperty("repository.deposit.path")
-		);
-		Path stagingPath = Paths.get(
-			environment.getRequiredProperty("repository.staging.path")
-		);
-		RepositoryManager manager = new RepositoryManager(
-			repositoryService,
-			infoPackageService,
-			replicaService,
-			repositoryClientRegistry
-		);
-		manager.setDepositPath(depositPath);
+    @Bean
+    public RepositoryManager repositoryManager(
+        RepositoryClientRegistry repositoryClientRegistry,
+        RepositoryService repositoryService,
+        InfoPackageService infoPackageService,
+        ReplicaService replicaService,
+        Environment environment
+    ) {
+        Path depositPath = Paths.get(
+            environment.getRequiredProperty("repository.deposit.path")
+        );
+        Path stagingPath = Paths.get(
+            environment.getRequiredProperty("repository.staging.path")
+        );
+        RepositoryManager manager = new RepositoryManager(
+            repositoryService,
+            infoPackageService,
+            replicaService,
+            repositoryClientRegistry
+        );
+        manager.setDepositPath(depositPath);
         manager.setStagingPath(stagingPath);
         return manager;
-	}
+    }
 
-	@Bean
-	public DepositFactory depositFactory(
-		RepositoryClientRegistry repositoryClientRegistry,
-		RepositoryService repositoryService,
-		InfoPackageService infoPackageService,
-		ReplicaService replicaService,
-		Environment environment
-	) {
-		Path depositPath = Paths.get(
-			environment.getRequiredProperty("repository.deposit.path")
-		);
-		return new DepositFactory(
-			infoPackageService,
-			repositoryService,
-			replicaService,
-			repositoryClientRegistry,
-			depositPath
-		);
-	}
+    @Bean
+    public DepositFactory depositFactory(
+        RepositoryClientRegistry repositoryClientRegistry,
+        RepositoryService repositoryService,
+        InfoPackageService infoPackageService,
+        ReplicaService replicaService,
+        Environment environment
+    ) {
+        Path depositPath = Paths.get(
+            environment.getRequiredProperty("repository.deposit.path")
+        );
+        return new DepositFactory(
+            infoPackageService,
+            repositoryService,
+            replicaService,
+            repositoryClientRegistry,
+            depositPath
+        );
+    }
 }
