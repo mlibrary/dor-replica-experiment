@@ -1,11 +1,10 @@
 package edu.umich.lib.dor.replicaexperiment;
 
-import java.util.List;
-
 import static org.junit.Assert.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
+
 import org.junit.Test;
 import org.junit.jupiter.api.BeforeEach;
 
@@ -41,14 +40,14 @@ public class RepositoryClientRegistryTest {
     }
 
     @Test
-    void repositoryClientCanGetARegisteredRepository() {
+    void registryCanGetARegisteredRepository() {
         RepositoryClientRegistry registry = new RepositoryClientRegistry();
         registry.register("repo_one", mockRepoOne);
         assertEquals(mockRepoOne, registry.getClient("repo_one"));
     }
 
     @Test
-    void repositoryClientThrowsErrorWhenRepositoryNotRegistered() {
+    void registryThrowsErrorWhenRepositoryNotRegistered() {
         assertThrows(RepositoryNotRegisteredException.class, () -> {
             RepositoryClientRegistry registry = new RepositoryClientRegistry();
             registry.getClient("repo_one");
