@@ -11,6 +11,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
+import edu.umich.lib.dor.replicaexperiment.service.DepositFactory;
 import edu.umich.lib.dor.replicaexperiment.service.InfoPackageService;
 import edu.umich.lib.dor.replicaexperiment.service.OcflFilesystemRepositoryClient;
 import edu.umich.lib.dor.replicaexperiment.service.ReplicaService;
@@ -34,23 +35,15 @@ public class AppConfig {
 	ReplicaService replicaService;
 
 	@Bean
-	public RepositoryManager repositoryManager(
+	RepositoryClientRegistry repositoryClientRegistry(
 		RepositoryService repositoryService,
-		InfoPackageService infoPackageService,
-		ReplicaService replicaService,
 		Environment environment
 	) {
-        Path repoOnePath = Paths.get(
+		Path repoOnePath = Paths.get(
 			environment.getRequiredProperty("repository.repo_one.path")
 		);
 		Path repoTwoPath = Paths.get(
 			environment.getRequiredProperty("repository.repo_two.path")
-		);
-		Path depositPath = Paths.get(
-			environment.getRequiredProperty("repository.deposit.path")
-		);
-		Path stagingPath = Paths.get(
-			environment.getRequiredProperty("repository.staging.path")
 		);
 
 		String repoOneName = "repo_one";
@@ -73,6 +66,23 @@ public class AppConfig {
 		for (String repositoryName: repositoryClientRegistry.listClients()) {
             this.repositoryService.getOrCreateRepository(repositoryName);
 		}
+		return repositoryClientRegistry;
+	}
+
+	@Bean
+	public RepositoryManager repositoryManager(
+		RepositoryClientRegistry repositoryClientRegistry,
+		RepositoryService repositoryService,
+		InfoPackageService infoPackageService,
+		ReplicaService replicaService,
+		Environment environment
+	) {
+		Path depositPath = Paths.get(
+			environment.getRequiredProperty("repository.deposit.path")
+		);
+		Path stagingPath = Paths.get(
+			environment.getRequiredProperty("repository.staging.path")
+		);
 		RepositoryManager manager = new RepositoryManager(
 			repositoryService,
 			infoPackageService,
@@ -82,5 +92,25 @@ public class AppConfig {
 		manager.setDepositPath(depositPath);
         manager.setStagingPath(stagingPath);
         return manager;
+	}
+
+	@Bean
+	public DepositFactory depositFactory(
+		RepositoryClientRegistry repositoryClientRegistry,
+		RepositoryService repositoryService,
+		InfoPackageService infoPackageService,
+		ReplicaService replicaService,
+		Environment environment
+	) {
+		Path depositPath = Paths.get(
+			environment.getRequiredProperty("repository.deposit.path")
+		);
+		return new DepositFactory(
+			infoPackageService,
+			repositoryService,
+			replicaService,
+			repositoryClientRegistry,
+			depositPath
+		);
 	}
 }
