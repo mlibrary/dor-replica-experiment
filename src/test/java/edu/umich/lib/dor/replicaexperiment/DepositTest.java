@@ -61,7 +61,6 @@ public class DepositTest {
 
     @Test
 	void depositCanBeCreated() {
-        when(registryMock.getClient("some_repo")).thenReturn(clientMock);
         when(packageServiceMock.getInfoPackage("A")).thenReturn(null);
         when(repositoryServiceMock.getRepository("some_repo")).thenReturn(
             new Repository("some_repo", RepositoryType.FILE_SYSTEM)

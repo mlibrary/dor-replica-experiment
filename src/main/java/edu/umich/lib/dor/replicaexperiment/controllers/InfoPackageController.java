@@ -19,6 +19,8 @@ import edu.umich.lib.dor.replicaexperiment.domain.User;
 import edu.umich.lib.dor.replicaexperiment.service.Deposit;
 import edu.umich.lib.dor.replicaexperiment.service.DepositFactory;
 import edu.umich.lib.dor.replicaexperiment.service.InfoPackageService;
+import edu.umich.lib.dor.replicaexperiment.service.Replication;
+import edu.umich.lib.dor.replicaexperiment.service.ReplicationFactory;
 import edu.umich.lib.dor.replicaexperiment.service.RepositoryManager;
 
 @Controller
@@ -34,6 +36,9 @@ public class InfoPackageController {
 
     @Autowired
     private DepositFactory depositFactory;
+
+    @Autowired
+    private ReplicationFactory replicationFactory;
 
     @PostMapping(path="/add")
     public @ResponseBody InfoPackageDto addPackageToRepository (
@@ -51,7 +56,7 @@ public class InfoPackageController {
     }
 
     @PostMapping(path="/deposit")
-    public @ResponseBody InfoPackageDto deposit (
+    public @ResponseBody InfoPackageDto deposit(
         @RequestParam String identifier,
         @RequestParam String depositSourcePath,
         @RequestParam String repository,
@@ -75,6 +80,20 @@ public class InfoPackageController {
         repositoryManager.replicatePackageToAnotherRepository(
             testUser, identifier, sourceRepository, targetRepository
         );
+        var newInfoPackage = infoPackageService.getInfoPackage(identifier);
+        return new InfoPackageDto(newInfoPackage);
+    }
+
+    @PutMapping(path="/replicate2")
+    public @ResponseBody InfoPackageDto replicate(
+        @RequestParam String identifier,
+        @RequestParam String sourceRepository,
+        @RequestParam String targetRepository
+    ) {
+        Replication replication = replicationFactory.create(
+            identifier, sourceRepository, targetRepository
+        );
+        replication.execute();
         var newInfoPackage = infoPackageService.getInfoPackage(identifier);
         return new InfoPackageDto(newInfoPackage);
     }

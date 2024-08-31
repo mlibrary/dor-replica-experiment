@@ -15,6 +15,7 @@ import edu.umich.lib.dor.replicaexperiment.service.DepositFactory;
 import edu.umich.lib.dor.replicaexperiment.service.InfoPackageService;
 import edu.umich.lib.dor.replicaexperiment.service.OcflFilesystemRepositoryClient;
 import edu.umich.lib.dor.replicaexperiment.service.ReplicaService;
+import edu.umich.lib.dor.replicaexperiment.service.ReplicationFactory;
 import edu.umich.lib.dor.replicaexperiment.service.RepositoryClient;
 import edu.umich.lib.dor.replicaexperiment.service.RepositoryClientRegistry;
 import edu.umich.lib.dor.replicaexperiment.service.RepositoryManager;
@@ -113,4 +114,25 @@ public class AppConfig {
             depositPath
         );
     }
+
+    @Bean
+    public ReplicationFactory replicationFactory(
+        RepositoryClientRegistry repositoryClientRegistry,
+        RepositoryService repositoryService,
+        InfoPackageService infoPackageService,
+        ReplicaService replicaService,
+        Environment environment
+    ) {
+        Path stagingPath = Paths.get(
+            environment.getRequiredProperty("repository.staging.path")
+        );
+        return new ReplicationFactory(
+            infoPackageService,
+            repositoryService,
+            replicaService,
+            repositoryClientRegistry,
+            stagingPath
+        );
+    }
+
 }
