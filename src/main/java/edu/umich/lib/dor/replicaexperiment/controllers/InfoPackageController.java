@@ -21,7 +21,6 @@ import edu.umich.lib.dor.replicaexperiment.service.DepositFactory;
 import edu.umich.lib.dor.replicaexperiment.service.InfoPackageService;
 import edu.umich.lib.dor.replicaexperiment.service.Replication;
 import edu.umich.lib.dor.replicaexperiment.service.ReplicationFactory;
-import edu.umich.lib.dor.replicaexperiment.service.RepositoryManager;
 
 @Controller
 @RequestMapping(path="/package")
@@ -32,28 +31,10 @@ public class InfoPackageController {
     private InfoPackageService infoPackageService;
 
     @Autowired
-    private RepositoryManager repositoryManager;
-
-    @Autowired
     private DepositFactory depositFactory;
 
     @Autowired
     private ReplicationFactory replicationFactory;
-
-    @PostMapping(path="/add")
-    public @ResponseBody InfoPackageDto addPackageToRepository (
-        @RequestParam String identifier,
-        @RequestParam String depositSourcePath,
-        @RequestParam String repository,
-        @RequestParam String message
-    ) {
-        Path sourcePathRelativeToDeposit = Paths.get(depositSourcePath);
-        repositoryManager.addPackageToRepository(
-            testUser, identifier, sourcePathRelativeToDeposit, repository, message
-        );
-        var newInfoPackage = infoPackageService.getInfoPackage(identifier);
-        return new InfoPackageDto(newInfoPackage);
-    }
 
     @PostMapping(path="/deposit")
     public @ResponseBody InfoPackageDto deposit(
@@ -72,19 +53,6 @@ public class InfoPackageController {
     }
 
     @PutMapping(path="/replicate")
-    public @ResponseBody InfoPackageDto replicatePackageToRepository(
-        @RequestParam String identifier,
-        @RequestParam String sourceRepository,
-        @RequestParam String targetRepository
-    ) {
-        repositoryManager.replicatePackageToAnotherRepository(
-            testUser, identifier, sourceRepository, targetRepository
-        );
-        var newInfoPackage = infoPackageService.getInfoPackage(identifier);
-        return new InfoPackageDto(newInfoPackage);
-    }
-
-    @PutMapping(path="/replicate2")
     public @ResponseBody InfoPackageDto replicate(
         @RequestParam String identifier,
         @RequestParam String sourceRepository,

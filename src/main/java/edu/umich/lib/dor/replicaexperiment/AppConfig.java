@@ -18,7 +18,6 @@ import edu.umich.lib.dor.replicaexperiment.service.ReplicaService;
 import edu.umich.lib.dor.replicaexperiment.service.ReplicationFactory;
 import edu.umich.lib.dor.replicaexperiment.service.RepositoryClient;
 import edu.umich.lib.dor.replicaexperiment.service.RepositoryClientRegistry;
-import edu.umich.lib.dor.replicaexperiment.service.RepositoryManager;
 import edu.umich.lib.dor.replicaexperiment.service.RepositoryService;
 
 @Configuration
@@ -71,31 +70,6 @@ public class AppConfig {
     }
 
     @Bean
-    public RepositoryManager repositoryManager(
-        RepositoryClientRegistry repositoryClientRegistry,
-        RepositoryService repositoryService,
-        InfoPackageService infoPackageService,
-        ReplicaService replicaService,
-        Environment environment
-    ) {
-        Path depositPath = Paths.get(
-            environment.getRequiredProperty("repository.deposit.path")
-        );
-        Path stagingPath = Paths.get(
-            environment.getRequiredProperty("repository.staging.path")
-        );
-        RepositoryManager manager = new RepositoryManager(
-            repositoryService,
-            infoPackageService,
-            replicaService,
-            repositoryClientRegistry
-        );
-        manager.setDepositPath(depositPath);
-        manager.setStagingPath(stagingPath);
-        return manager;
-    }
-
-    @Bean
     public DepositFactory depositFactory(
         RepositoryClientRegistry repositoryClientRegistry,
         RepositoryService repositoryService,
@@ -134,5 +108,4 @@ public class AppConfig {
             stagingPath
         );
     }
-
 }
