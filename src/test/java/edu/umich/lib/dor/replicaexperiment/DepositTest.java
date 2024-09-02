@@ -15,7 +15,7 @@ import org.junit.jupiter.api.Test;
 import edu.umich.lib.dor.replicaexperiment.domain.InfoPackage;
 import edu.umich.lib.dor.replicaexperiment.domain.Replica;
 import edu.umich.lib.dor.replicaexperiment.domain.Repository;
-import edu.umich.lib.dor.replicaexperiment.domain.User;
+import edu.umich.lib.dor.replicaexperiment.domain.Curator;
 import edu.umich.lib.dor.replicaexperiment.exception.EntityAlreadyExistsException;
 import edu.umich.lib.dor.replicaexperiment.exception.NoEntityException;
 import edu.umich.lib.dor.replicaexperiment.service.DepositFactory;
@@ -26,7 +26,7 @@ import edu.umich.lib.dor.replicaexperiment.service.RepositoryClientRegistry;
 import edu.umich.lib.dor.replicaexperiment.service.RepositoryService;
 
 public class DepositTest {
-    User testUser = new User("test", "test@example.edu");
+    Curator testCurator = new Curator("test", "test@example.edu");
     InfoPackageService packageServiceMock;
     RepositoryService repositoryServiceMock;
     ReplicaService replicaServiceMock;
@@ -70,7 +70,7 @@ public class DepositTest {
     
         assertDoesNotThrow(() -> {
             depositFactory.create(
-                testUser,
+                testCurator,
                 "A",
                 Paths.get("something"),
                 "some_repo",
@@ -85,7 +85,7 @@ public class DepositTest {
 
         assertThrows(EntityAlreadyExistsException.class, () -> {
             depositFactory.create(
-                testUser,
+                testCurator,
                 "A",
                 Paths.get("/something"),
                 "some_repo",
@@ -101,7 +101,7 @@ public class DepositTest {
 
         assertThrows(NoEntityException.class, () -> {
             depositFactory.create(
-                testUser,
+                testCurator,
                 "A",
                 Paths.get("/something"),
                 "some_repo",
@@ -117,7 +117,7 @@ public class DepositTest {
         when(registryMock.getClient("some_repo")).thenReturn(clientMock);
 
         var deposit = depositFactory.create(
-            testUser,
+            testCurator,
             "A",
             Paths.get("something"),
             "some_repo",
@@ -130,7 +130,7 @@ public class DepositTest {
         deposit.execute();
 
         verify(clientMock).createObject(
-            "A", depositPath.resolve("something"), testUser, "we're good"
+            "A", depositPath.resolve("something"), testCurator, "we're good"
         );
         verify(packageServiceMock).createInfoPackage("A");
         verify(replicaServiceMock).createReplica(infoPackageMock, repositoryMock);

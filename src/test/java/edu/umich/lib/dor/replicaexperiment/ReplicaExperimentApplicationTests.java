@@ -24,10 +24,10 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.util.FileSystemUtils;
 
+import edu.umich.lib.dor.replicaexperiment.domain.Curator;
 import edu.umich.lib.dor.replicaexperiment.domain.InfoPackage;
 import edu.umich.lib.dor.replicaexperiment.domain.Replica;
 import edu.umich.lib.dor.replicaexperiment.domain.Repository;
-import edu.umich.lib.dor.replicaexperiment.domain.User;
 import edu.umich.lib.dor.replicaexperiment.service.Deposit;
 import edu.umich.lib.dor.replicaexperiment.service.DepositFactory;
 import edu.umich.lib.dor.replicaexperiment.service.InfoPackageService;
@@ -64,7 +64,7 @@ class ReplicaExperimentApplicationTests {
 
     Path stagingPath = testReposPath.resolve("staging");
 
-    User testUser = new User("test", "test@example.edu");
+    Curator testCurator = new Curator("test", "test@example.edu");
 
     @Autowired
     InfoPackageService infoPackageService;
@@ -129,7 +129,7 @@ class ReplicaExperimentApplicationTests {
     @Test
     void depositCreatesFilesInARepository() {
         var deposit = depositFactory.create(
-            testUser, depositAIdentifier, depositAPath, repoOneName, "first version!!!"
+            testCurator, depositAIdentifier, depositAPath, repoOneName, "first version!!!"
         );
         deposit.execute();
 
@@ -154,7 +154,7 @@ class ReplicaExperimentApplicationTests {
     @Test
     void replicationCopiesFilesToAnotherRepository() {
         Deposit deposit = depositFactory.create(
-            testUser, depositAIdentifier, depositAPath, repoOneName, "first version!!!"
+            testCurator, depositAIdentifier, depositAPath, repoOneName, "first version!!!"
         );
         deposit.execute();
         var replication = replicationFactory.create(depositAIdentifier, repoOneName, repoTwoName);
