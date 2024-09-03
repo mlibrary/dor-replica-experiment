@@ -152,7 +152,7 @@ class ReplicaExperimentApplicationTests {
     }
 
     @Test
-    void replicateCopiesFilesToAnotherRepository() {
+    void replicationCopiesFilesToAnotherRepository() {
         Deposit deposit = depositFactory.create(
             testUser, depositAIdentifier, depositAPath, repoOneName, "first version!!!"
         );
