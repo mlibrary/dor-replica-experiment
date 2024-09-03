@@ -58,8 +58,8 @@ public class ReplicationTest {
         );
     }
 
-	@Test
-	void replicationCanBeCreated() {
+    @Test
+    void replicationCanBeCreated() {
         Repository sourceRepositoryMock = mock(Repository.class);
         Repository targetRepositoryMock = mock(Repository.class);
 
@@ -84,7 +84,7 @@ public class ReplicationTest {
 	}
 
     @Test
-	void replicationSpecifiesInfoPackageThatDoesNotExist() {
+    void replicationSpecifiesInfoPackageThatDoesNotExist() {
         when(packageServiceMock.getInfoPackage("A")).thenReturn(null);
     
         assertThrows(NoEntityException.class, () -> {
@@ -97,8 +97,11 @@ public class ReplicationTest {
     }
 
     @Test
-	void replicationSpecifiesInfoPackageWithoutReplicaInSourceRepository() {
+    void replicationSpecifiesInfoPackageWithoutReplicaInSourceRepository() {
+        Repository sourceRepositoryMock = mock(Repository.class);
+
         when(packageServiceMock.getInfoPackage("A")).thenReturn(infoPackageMock);
+        when(repositoryServiceMock.getRepository("some_repo")).thenReturn(sourceRepositoryMock);
         when(infoPackageMock.hasAReplicaIn("some_repo")).thenReturn(false);
 
         assertThrows(NoEntityException.class, () -> {
@@ -111,8 +114,8 @@ public class ReplicationTest {
     }
 
 
-	@Test
-	void replicationExecutes() {
+    @Test
+    void replicationExecutes() {
         Repository sourceRepositoryMock = mock(Repository.class);
         Repository targetRepositoryMock = mock(Repository.class);
         Path objectPathInStaging = stagingPath.resolve("A");

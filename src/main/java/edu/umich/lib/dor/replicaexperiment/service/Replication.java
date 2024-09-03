@@ -63,6 +63,7 @@ public class Replication implements Command {
             throw new NoEntityException(
                 String.format(
                     "No replica for package \"%s\" was found in repository \"%s\".",
+                    packageIdentifier,
                     sourceRepositoryName
                 )
             );
