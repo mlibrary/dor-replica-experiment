@@ -13,14 +13,13 @@ import edu.umich.lib.dor.replicaexperiment.service.OcflFilesystemRepositoryClien
 import edu.umich.lib.dor.replicaexperiment.service.RepositoryClientRegistry;
 
 public class RepositoryClientRegistryTest {
-    
     OcflFilesystemRepositoryClient mockRepoOne;
     OcflFilesystemRepositoryClient mockRepoTwo;
 
     @BeforeEach
     void init() {
-        mockRepoOne = mock(OcflFilesystemRepositoryClient.class);
-        mockRepoTwo = mock(OcflFilesystemRepositoryClient.class);
+        this.mockRepoOne = mock(OcflFilesystemRepositoryClient.class);
+        this.mockRepoTwo = mock(OcflFilesystemRepositoryClient.class);
     }
 
     @Test
