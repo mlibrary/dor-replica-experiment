@@ -60,7 +60,7 @@ public class DepositTest {
     }
 
     @Test
-	void depositCanBeCreated() {
+    void depositCanBeCreated() {
         when(packageServiceMock.getInfoPackage("A")).thenReturn(null);
         when(repositoryServiceMock.getRepository("some_repo")).thenReturn(
             new Repository("some_repo", RepositoryType.FILE_SYSTEM)
@@ -79,7 +79,7 @@ public class DepositTest {
     }
 
     @Test
-	void depositSpecifiesPackageThatAlreadyExists() {
+    void depositSpecifiesPackageThatAlreadyExists() {
         when(packageServiceMock.getInfoPackage("A")).thenReturn(
             new InfoPackage("A")
         );
@@ -96,7 +96,7 @@ public class DepositTest {
     }
 
     @Test
-	void depositSpecifiesRepositoryThatDoesNotExist() {
+    void depositSpecifiesRepositoryThatDoesNotExist() {
         when(repositoryServiceMock.getRepository("some_repo")).thenReturn(null);
 
         assertThrows(NoEntityException.class, () -> {
@@ -111,7 +111,7 @@ public class DepositTest {
     }
 
     @Test
-	void depositExecutes() {
+    void depositExecutes() {
         var repository = new Repository("some_repo", RepositoryType.FILE_SYSTEM);
         var infoPackage = new InfoPackage("A");
 
