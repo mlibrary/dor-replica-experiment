@@ -30,10 +30,13 @@ public class ReplicationTest {
     ReplicaService replicaServiceMock;
     RepositoryClientRegistry registryMock;
     InfoPackage infoPackageMock;
+    Path stagingPath;
+
     OcflFilesystemRepositoryClient sourceClientMock;
     OcflFilesystemRepositoryClient targetClientMock;
     Replica replicaMock;
-    Path stagingPath;
+    Repository sourceRepositoryMock;
+    Repository targetRepositoryMock;
 
     ReplicationFactory replicationFactory;
 
@@ -44,9 +47,6 @@ public class ReplicationTest {
         this.replicaServiceMock = mock(ReplicaService.class);
         this.registryMock = mock(RepositoryClientRegistry.class);
         this.infoPackageMock = mock(InfoPackage.class);
-        this.sourceClientMock = mock(OcflFilesystemRepositoryClient.class);
-        this.targetClientMock = mock(OcflFilesystemRepositoryClient.class);
-        this.replicaMock = mock(Replica.class);
         this.stagingPath = Paths.get("staging");
 
         this.replicationFactory = new ReplicationFactory(
@@ -56,6 +56,12 @@ public class ReplicationTest {
             registryMock,
             stagingPath
         );
+
+        this.sourceClientMock = mock(OcflFilesystemRepositoryClient.class);
+        this.targetClientMock = mock(OcflFilesystemRepositoryClient.class);
+        this.replicaMock = mock(Replica.class);
+        this.sourceRepositoryMock = mock(Repository.class);
+        this.targetRepositoryMock = mock(Repository.class);
     }
 
     @Test
@@ -64,14 +70,10 @@ public class ReplicationTest {
         Repository targetRepositoryMock = mock(Repository.class);
 
         when(packageServiceMock.getInfoPackage("A")).thenReturn(infoPackageMock);
+        when(repositoryServiceMock.getRepository("some_repo")).thenReturn(sourceRepositoryMock);
+        when(registryMock.getClient("some_repo")).thenReturn(sourceClientMock);
         when(infoPackageMock.hasAReplicaIn("some_repo")).thenReturn(true);
-
-        when(repositoryServiceMock.getRepository("some_repo"))
-            .thenReturn(sourceRepositoryMock);
-            when(registryMock.getClient("some_repo")).thenReturn(sourceClientMock);
-
-        when(repositoryServiceMock.getRepository("some_other_repo"))
-            .thenReturn(targetRepositoryMock);
+        when(repositoryServiceMock.getRepository("some_other_repo")).thenReturn(targetRepositoryMock);
         when(registryMock.getClient("some_other_repo")).thenReturn(targetClientMock);
 
         assertDoesNotThrow(() -> {
@@ -97,11 +99,26 @@ public class ReplicationTest {
     }
 
     @Test
+    void replicationSpecifiesSourceRepositoryThatDoesNotExist() {
+        when(packageServiceMock.getInfoPackage("A")).thenReturn(infoPackageMock);
+        when(repositoryServiceMock.getRepository("some_repo")).thenReturn(null);
+
+        assertThrows(NoEntityException.class, () -> {
+            replicationFactory.create(
+                "A",
+                "some_repo",
+                "some_other_repo"
+            );
+        });
+    }
+
+    @Test
     void replicationSpecifiesInfoPackageWithoutReplicaInSourceRepository() {
         Repository sourceRepositoryMock = mock(Repository.class);
 
         when(packageServiceMock.getInfoPackage("A")).thenReturn(infoPackageMock);
         when(repositoryServiceMock.getRepository("some_repo")).thenReturn(sourceRepositoryMock);
+        when(registryMock.getClient("some_repo")).thenReturn(sourceClientMock);
         when(infoPackageMock.hasAReplicaIn("some_repo")).thenReturn(false);
 
         assertThrows(NoEntityException.class, () -> {
@@ -113,22 +130,32 @@ public class ReplicationTest {
         });
     }
 
+    @Test
+    void replicationSpecifiesTargetRepositoryThatDoesNotExist() {
+        when(packageServiceMock.getInfoPackage("A")).thenReturn(infoPackageMock);
+        when(repositoryServiceMock.getRepository("some_repo")).thenReturn(sourceRepositoryMock);
+        when(registryMock.getClient("some_repo")).thenReturn(sourceClientMock);
+        when(infoPackageMock.hasAReplicaIn("some_repo")).thenReturn(true);
+        when(repositoryServiceMock.getRepository("some_other_repo")).thenReturn(null);
+
+        assertThrows(NoEntityException.class, () -> {
+            replicationFactory.create(
+                "A",
+                "some_repo",
+                "some_other_repo"
+            );
+        });
+    }
 
     @Test
     void replicationExecutes() {
-        Repository sourceRepositoryMock = mock(Repository.class);
-        Repository targetRepositoryMock = mock(Repository.class);
         Path objectPathInStaging = stagingPath.resolve("A");
 
         when(packageServiceMock.getInfoPackage("A")).thenReturn(infoPackageMock);
         when(infoPackageMock.hasAReplicaIn("some_repo")).thenReturn(true);
-
-        when(repositoryServiceMock.getRepository("some_repo"))
-            .thenReturn(sourceRepositoryMock);
+        when(repositoryServiceMock.getRepository("some_repo")).thenReturn(sourceRepositoryMock);
         when(registryMock.getClient("some_repo")).thenReturn(sourceClientMock);
-
-        when(repositoryServiceMock.getRepository("some_other_repo"))
-            .thenReturn(targetRepositoryMock);
+        when(repositoryServiceMock.getRepository("some_other_repo")).thenReturn(targetRepositoryMock);
         when(registryMock.getClient("some_other_repo")).thenReturn(targetClientMock);
 
         Replication replication = replicationFactory.create(
