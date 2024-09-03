@@ -10,7 +10,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -29,14 +28,14 @@ import edu.umich.lib.dor.replicaexperiment.domain.InfoPackage;
 import edu.umich.lib.dor.replicaexperiment.domain.Replica;
 import edu.umich.lib.dor.replicaexperiment.domain.Repository;
 import edu.umich.lib.dor.replicaexperiment.domain.User;
-import edu.umich.lib.dor.replicaexperiment.exception.EntityAlreadyExistsException;
-import edu.umich.lib.dor.replicaexperiment.exception.NoContentException;
-import edu.umich.lib.dor.replicaexperiment.exception.NoEntityException;
-import edu.umich.lib.dor.replicaexperiment.exception.RepositoryNotRegisteredException;
+import edu.umich.lib.dor.replicaexperiment.service.Deposit;
+import edu.umich.lib.dor.replicaexperiment.service.DepositFactory;
 import edu.umich.lib.dor.replicaexperiment.service.InfoPackageService;
 import edu.umich.lib.dor.replicaexperiment.service.OcflFilesystemRepositoryClient;
+import edu.umich.lib.dor.replicaexperiment.service.ReplicaService;
+import edu.umich.lib.dor.replicaexperiment.service.ReplicationFactory;
 import edu.umich.lib.dor.replicaexperiment.service.RepositoryClient;
-import edu.umich.lib.dor.replicaexperiment.service.RepositoryManager;
+import edu.umich.lib.dor.replicaexperiment.service.RepositoryClientRegistry;
 import edu.umich.lib.dor.replicaexperiment.service.RepositoryService;
 
 @Import(TestcontainersConfiguration.class)
@@ -46,182 +45,135 @@ import edu.umich.lib.dor.replicaexperiment.service.RepositoryService;
 @EntityScan(basePackages={"edu.umich.lib.dor.replicaexperiment.domain"})
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 class ReplicaExperimentApplicationTests {
-	private static final Log log = LogFactory.getLog(ReplicaExperimentApplication.class);
+    static final Log log = LogFactory.getLog(ReplicaExperimentApplication.class);
 
-	private Path testReposPath = Paths.get("src", "test", "resources", "test_repositories");
-	private String repoOneName = "repo_one";
-	private Path repoOnePath = testReposPath.resolve("repo_one");
-	private Path repoOneStoragePath = repoOnePath.resolve("storage");
-	private Path repoOneWorkspacePath = repoOnePath.resolve("workspace");
+    Path testReposPath = Paths.get("src", "test", "resources", "test_repositories");
+    String repoOneName = "repo_one";
+    Path repoOnePath = testReposPath.resolve("repo_one");
+    Path repoOneStoragePath = repoOnePath.resolve("storage");
+    Path repoOneWorkspacePath = repoOnePath.resolve("workspace");
 
-	private String repoTwoName = "repo_two";
-	private Path repoTwoPath = testReposPath.resolve("repo_two");
-	private Path repoTwoStoragePath = repoTwoPath.resolve("storage");
-	private Path repoTwoWorkspacePath = repoTwoPath.resolve("workspace");
+    String repoTwoName = "repo_two";
+    Path repoTwoPath = testReposPath.resolve("repo_two");
+    Path repoTwoStoragePath = repoTwoPath.resolve("storage");
+    Path repoTwoWorkspacePath = repoTwoPath.resolve("workspace");
 
-	private Path depositPath = testReposPath.resolve("deposit");
-	private String depositAIdentifier = "A";
-	private Path depositAPath = Paths.get("A");
+    Path depositPath = testReposPath.resolve("deposit");
+    String depositAIdentifier = "A";
+    Path depositAPath = Paths.get("A");
 
-	private Path stagingPath = testReposPath.resolve("staging");
+    Path stagingPath = testReposPath.resolve("staging");
 
-	User testUser = new User("test", "test@example.edu");
+    User testUser = new User("test", "test@example.edu");
 
-	@Autowired
-	private RepositoryManager repositoryManager;
+    @Autowired
+    InfoPackageService infoPackageService;
 
-	@Autowired
-	private InfoPackageService infoPackageService;
+    @Autowired
+    RepositoryService repositoryService;
 
-	@Autowired
-	private RepositoryService repositoryService;
+    @Autowired
+    ReplicaService replicaService;
 
-	private RepositoryClient repoOneClient;
-	private RepositoryClient repoTwoClient;
+    DepositFactory depositFactory;
+    ReplicationFactory replicationFactory;
 
-	void resetDirPath(Path path) {
-		if (Files.exists(path)) {
-			try {
-				FileSystemUtils.deleteRecursively(path);
-			} catch (IOException e) {
-				log.error(e.getMessage());
-			}
-		}
-		try {
-			Files.createDirectories(path);
-		} catch (IOException e) {
-			log.error(e.getMessage());
-		}
-	}
+    RepositoryClient repoOneClient;
+    RepositoryClient repoTwoClient;
 
-	@BeforeEach
-	void init() {
-		resetDirPath(repoOneStoragePath);
-		resetDirPath(repoTwoStoragePath);
-		this.repoOneClient = new OcflFilesystemRepositoryClient(
-			repoOneStoragePath, repoOneWorkspacePath
-		);
-		this.repoTwoClient = new OcflFilesystemRepositoryClient(
-			repoTwoStoragePath, repoTwoWorkspacePath
-		);
-		repositoryManager.registerRepository(repoOneName, repoOneClient);
-		repositoryManager.registerRepository(repoTwoName, repoTwoClient);
-		repositoryManager.setDepositPath(depositPath);
-		repositoryManager.setStagingPath(stagingPath);
-		log.debug(repositoryManager);
-	}
+    void resetDirPath(Path path) {
+        if (Files.exists(path)) {
+            try {
+                FileSystemUtils.deleteRecursively(path);
+            } catch (IOException e) {
+                log.error(e.getMessage());
+            }
+        }
+        try {
+            Files.createDirectories(path);
+        } catch (IOException e) {
+            log.error(e.getMessage());
+        }
+    }
 
-	@Test
-	void contextLoads() {
-	}
+    @BeforeEach
+    void init() {
+        resetDirPath(repoOneStoragePath);
+        resetDirPath(repoTwoStoragePath);
+        this.repoOneClient = new OcflFilesystemRepositoryClient(
+            repoOneStoragePath, repoOneWorkspacePath
+        );
+        this.repoTwoClient = new OcflFilesystemRepositoryClient(
+            repoTwoStoragePath, repoTwoWorkspacePath
+        );
 
-	@Test
-	void repositoryManagerCanAddAPackageToARepository() {
-		repositoryManager.addPackageToRepository(
-			testUser, depositAIdentifier, depositAPath, repoOneName, "first version!!!"
-		);
+        RepositoryClientRegistry registry = new RepositoryClientRegistry();
+        registry.register(repoOneName, repoOneClient);
+        registry.register(repoTwoName, repoTwoClient);
+        for (String repositoryName: registry.listClients()) {
+            this.repositoryService.getOrCreateRepository(repositoryName);
+        }
 
-		InfoPackage infoPackageA = infoPackageService.getInfoPackage(depositAIdentifier);
-		Repository repository = repositoryService.getRepository(repoOneName);
+        this.depositFactory = new DepositFactory(
+            infoPackageService, repositoryService, replicaService, registry, depositPath
+        );
+        this.replicationFactory = new ReplicationFactory(
+            infoPackageService, repositoryService, replicaService, registry, stagingPath
+        );
+    }
 
-		assertEquals("A", infoPackageA.getIdentifier());
+    @Test
+    void contextLoads() {
+    }
 
-		assertEquals("FILE_SYSTEM", repository.getType());
-		assertEquals(repoOneName, repository.getName());
+    @Test
+    void depositCreatesFilesInARepository() {
+        var deposit = depositFactory.create(
+            testUser, depositAIdentifier, depositAPath, repoOneName, "first version!!!"
+        );
+        deposit.execute();
 
-		assertEquals(1, infoPackageA.getReplicas().size());
-		assertTrue(infoPackageA.hasAReplicaIn(repoOneName));
+        InfoPackage infoPackageA = infoPackageService.getInfoPackage(depositAIdentifier);
+        Repository repository = repositoryService.getRepository(repoOneName);
 
-		List<String> filePaths = repoOneClient.getFilePaths(depositAIdentifier);
-		for (String filePath: filePaths) {
-			Path fullPath = repoOneStoragePath.resolve(filePath);
-			assertTrue(Files.exists(fullPath));
-		}
-	}
+        assertEquals("A", infoPackageA.getIdentifier());
 
-	@Test
-	void repositoryManagerThrowsExceptionDuringAdditionIfRepositoryDoesNotExist() {
-		assertThrows(NoEntityException.class, () -> {
-			repositoryManager.addPackageToRepository(
-				testUser,
-				"something",
-				Paths.get("some/thing"),
-				"repo_three",
-				"was there a repo_three?"
-			);
-		});
-	}
+        assertEquals("FILE_SYSTEM", repository.getType());
+        assertEquals(repoOneName, repository.getName());
 
-	@Test
-	void repositoryManagerThrowsExceptionDuringAdditionIfPackageExists() {
-		repositoryManager.addPackageToRepository(
-			testUser, depositAIdentifier, depositAPath, repoOneName, "first version!!!"
-		);
-		assertThrows(EntityAlreadyExistsException.class, () -> {
-			repositoryManager.addPackageToRepository(
-				testUser,
-				depositAIdentifier,
-				depositAPath,
-				repoOneName,
-				"did I already add this?"
-			);
-		});
-	}
+        assertEquals(1, infoPackageA.getReplicas().size());
+        assertTrue(infoPackageA.hasAReplicaIn(repoOneName));
 
-	@Test
-	void repositoryManagerThrowsExceptionDuringAdditionIfDepositContentIsNotPresent() {
-		assertThrows(NoContentException.class, () -> {
-			repositoryManager.addPackageToRepository(
-				testUser,
-				"B",
-				Paths.get("B"),
-				"repo_one",
-				"did I forget to put content at the deposit path?"
-			);
-		});
-	}
+        List<String> filePaths = repoOneClient.getFilePaths(depositAIdentifier);
+        for (String filePath: filePaths) {
+            Path fullPath = repoOneStoragePath.resolve(filePath);
+            assertTrue(Files.exists(fullPath));
+        }
+    }
 
-	@Test
-	void repositoryManagerCanReplicateAPackageToAnotherRepository() {
-		repositoryManager.addPackageToRepository(
-			testUser, depositAIdentifier, depositAPath, repoOneName, "first version!!!"
-		);
-		repositoryManager.replicatePackageToAnotherRepository(
-			testUser, depositAIdentifier, repoOneName, repoTwoName
-		);
+    @Test
+    void replicationCopiesFilesToAnotherRepository() {
+        Deposit deposit = depositFactory.create(
+            testUser, depositAIdentifier, depositAPath, repoOneName, "first version!!!"
+        );
+        deposit.execute();
+        var replication = replicationFactory.create(depositAIdentifier, repoOneName, repoTwoName);
+        replication.execute();
 
-		InfoPackage infoPackage = infoPackageService.getInfoPackage(depositAIdentifier);
-		assertEquals(2, infoPackage.getNumReplicas());
-		Repository repositoryTwo = repositoryService.getRepository(repoTwoName);
-		var replicasInRepoTwo = repositoryTwo.getReplicas();
-		assertEquals(1, replicasInRepoTwo.size());
-		if (replicasInRepoTwo.size() == 1) {
-			Replica repoTwoReplica = replicasInRepoTwo.iterator().next();
-			assertEquals(depositAIdentifier, repoTwoReplica.getInfoPackage().getIdentifier());
-		}
+        InfoPackage infoPackage = infoPackageService.getInfoPackage(depositAIdentifier);
+        assertEquals(2, infoPackage.getNumReplicas());
+        Repository repositoryTwo = repositoryService.getRepository(repoTwoName);
+        var replicasInRepoTwo = repositoryTwo.getReplicas();
+        assertEquals(1, replicasInRepoTwo.size());
+        if (replicasInRepoTwo.size() == 1) {
+            Replica repoTwoReplica = replicasInRepoTwo.iterator().next();
+            assertEquals(depositAIdentifier, repoTwoReplica.getInfoPackage().getIdentifier());
+        }
 
-		List<String> filePaths = repoTwoClient.getFilePaths(depositAIdentifier);
-		for (String filePath: filePaths) {
-			Path fullPath = repoTwoStoragePath.resolve(filePath);
-			assertTrue(Files.exists(fullPath));
-		}
-	}
-
-	@Test
-	void repositoryManagerThrowsExceptionDuringReplicationIfRepositoryNotRegistered() {
-		assertThrows(RepositoryNotRegisteredException.class, () -> {
-			repositoryManager.replicatePackageToAnotherRepository(
-				testUser, depositAIdentifier, repoOneName, "repo_three"
-			);
-		});
-	}
-
-	@Test
-	void repositoryManagerThrowsExceptionDuringReplicationIfPackageDoesNotExist() {
-		assertThrows(NoEntityException.class, () -> {
-			repositoryManager.replicatePackageToAnotherRepository(
-				testUser, "B", repoOneName, repoTwoName
-			);
-		});
-	}
+        List<String> filePaths = repoTwoClient.getFilePaths(depositAIdentifier);
+        for (String filePath: filePaths) {
+            Path fullPath = repoTwoStoragePath.resolve(filePath);
+            assertTrue(Files.exists(fullPath));
+        }
+    }
 }

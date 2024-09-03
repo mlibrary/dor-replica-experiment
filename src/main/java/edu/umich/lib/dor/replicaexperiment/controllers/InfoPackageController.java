@@ -16,8 +16,11 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import edu.umich.lib.dor.replicaexperiment.controllers.dtos.InfoPackageDto;
 import edu.umich.lib.dor.replicaexperiment.domain.InfoPackage;
 import edu.umich.lib.dor.replicaexperiment.domain.User;
+import edu.umich.lib.dor.replicaexperiment.service.Deposit;
+import edu.umich.lib.dor.replicaexperiment.service.DepositFactory;
 import edu.umich.lib.dor.replicaexperiment.service.InfoPackageService;
-import edu.umich.lib.dor.replicaexperiment.service.RepositoryManager;
+import edu.umich.lib.dor.replicaexperiment.service.Replication;
+import edu.umich.lib.dor.replicaexperiment.service.ReplicationFactory;
 
 @Controller
 @RequestMapping(path="/package")
@@ -28,32 +31,37 @@ public class InfoPackageController {
     private InfoPackageService infoPackageService;
 
     @Autowired
-    private RepositoryManager repositoryManager;
+    private DepositFactory depositFactory;
 
-    @PostMapping(path="/add")
-    public @ResponseBody InfoPackageDto addPackageToRepository (
+    @Autowired
+    private ReplicationFactory replicationFactory;
+
+    @PostMapping(path="/deposit")
+    public @ResponseBody InfoPackageDto deposit(
         @RequestParam String identifier,
         @RequestParam String depositSourcePath,
         @RequestParam String repository,
         @RequestParam String message
     ) {
         Path sourcePathRelativeToDeposit = Paths.get(depositSourcePath);
-        repositoryManager.addPackageToRepository(
+        Deposit deposit = depositFactory.create(
             testUser, identifier, sourcePathRelativeToDeposit, repository, message
         );
+        deposit.execute();
         var newInfoPackage = infoPackageService.getInfoPackage(identifier);
         return new InfoPackageDto(newInfoPackage);
     }
 
     @PutMapping(path="/replicate")
-    public @ResponseBody InfoPackageDto replicatePackageToRepository(
+    public @ResponseBody InfoPackageDto replicate(
         @RequestParam String identifier,
         @RequestParam String sourceRepository,
         @RequestParam String targetRepository
     ) {
-        repositoryManager.replicatePackageToAnotherRepository(
-            testUser, identifier, sourceRepository, targetRepository
+        Replication replication = replicationFactory.create(
+            identifier, sourceRepository, targetRepository
         );
+        replication.execute();
         var newInfoPackage = infoPackageService.getInfoPackage(identifier);
         return new InfoPackageDto(newInfoPackage);
     }
