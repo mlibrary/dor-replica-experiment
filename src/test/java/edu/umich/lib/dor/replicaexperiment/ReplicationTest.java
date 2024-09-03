@@ -86,7 +86,7 @@ public class ReplicationTest {
     }
 
     @Test
-    void replicationSpecifiesInfoPackageThatDoesNotExist() {
+    void replicationFailsWhenInfoPackageDoesNotExist() {
         when(packageServiceMock.getInfoPackage("A")).thenReturn(null);
     
         assertThrows(NoEntityException.class, () -> {
@@ -99,7 +99,7 @@ public class ReplicationTest {
     }
 
     @Test
-    void replicationSpecifiesSourceRepositoryThatDoesNotExist() {
+    void replicationFailsWhenSourceRepositoryDoesNotExist() {
         when(packageServiceMock.getInfoPackage("A")).thenReturn(infoPackageMock);
         when(repositoryServiceMock.getRepository("some_repo")).thenReturn(null);
 
@@ -113,7 +113,7 @@ public class ReplicationTest {
     }
 
     @Test
-    void replicationSpecifiesInfoPackageWithoutReplicaInSourceRepository() {
+    void replicationFailsWhenInfoPackageDoesNotHaveReplicaInSourceRepository() {
         Repository sourceRepositoryMock = mock(Repository.class);
 
         when(packageServiceMock.getInfoPackage("A")).thenReturn(infoPackageMock);
@@ -131,7 +131,7 @@ public class ReplicationTest {
     }
 
     @Test
-    void replicationSpecifiesTargetRepositoryThatDoesNotExist() {
+    void replicationFailsWhenTargetRepositoryDoesNotExist() {
         when(packageServiceMock.getInfoPackage("A")).thenReturn(infoPackageMock);
         when(repositoryServiceMock.getRepository("some_repo")).thenReturn(sourceRepositoryMock);
         when(registryMock.getClient("some_repo")).thenReturn(sourceClientMock);

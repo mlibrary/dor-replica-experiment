@@ -80,7 +80,7 @@ public class DepositTest {
     }
 
     @Test
-    void depositSpecifiesPackageThatAlreadyExists() {
+    void depositFailsWhenPackageAlreadyExists() {
         when(packageServiceMock.getInfoPackage("A")).thenReturn(infoPackageMock);
 
         assertThrows(EntityAlreadyExistsException.class, () -> {
@@ -95,7 +95,7 @@ public class DepositTest {
     }
 
     @Test
-    void depositSpecifiesRepositoryThatDoesNotExist() {
+    void depositFailsWhenRepositoryDoesNotExist() {
         when(packageServiceMock.getInfoPackage("A")).thenReturn(null);
         when(repositoryServiceMock.getRepository("some_repo")).thenReturn(null);
 

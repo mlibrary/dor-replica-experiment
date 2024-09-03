@@ -127,7 +127,7 @@ class ReplicaExperimentApplicationTests {
     }
 
     @Test
-    void repositoryManagerDepositAPackageInARepository() {
+    void depositCreatesFilesInARepository() {
         var deposit = depositFactory.create(
             testUser, depositAIdentifier, depositAPath, repoOneName, "first version!!!"
         );
@@ -152,7 +152,7 @@ class ReplicaExperimentApplicationTests {
     }
 
     @Test
-    void repositoryManagerCanReplicateAPackageToAnotherRepository() {
+    void replicateCopiesFilesToAnotherRepository() {
         Deposit deposit = depositFactory.create(
             testUser, depositAIdentifier, depositAPath, repoOneName, "first version!!!"
         );
