@@ -45,41 +45,41 @@ import edu.umich.lib.dor.replicaexperiment.service.RepositoryService;
 @EntityScan(basePackages={"edu.umich.lib.dor.replicaexperiment.domain"})
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 class ReplicaExperimentApplicationTests {
-    private static final Log log = LogFactory.getLog(ReplicaExperimentApplication.class);
+    static final Log log = LogFactory.getLog(ReplicaExperimentApplication.class);
 
-    private Path testReposPath = Paths.get("src", "test", "resources", "test_repositories");
-    private String repoOneName = "repo_one";
-    private Path repoOnePath = testReposPath.resolve("repo_one");
-    private Path repoOneStoragePath = repoOnePath.resolve("storage");
-    private Path repoOneWorkspacePath = repoOnePath.resolve("workspace");
+    Path testReposPath = Paths.get("src", "test", "resources", "test_repositories");
+    String repoOneName = "repo_one";
+    Path repoOnePath = testReposPath.resolve("repo_one");
+    Path repoOneStoragePath = repoOnePath.resolve("storage");
+    Path repoOneWorkspacePath = repoOnePath.resolve("workspace");
 
-    private String repoTwoName = "repo_two";
-    private Path repoTwoPath = testReposPath.resolve("repo_two");
-    private Path repoTwoStoragePath = repoTwoPath.resolve("storage");
-    private Path repoTwoWorkspacePath = repoTwoPath.resolve("workspace");
+    String repoTwoName = "repo_two";
+    Path repoTwoPath = testReposPath.resolve("repo_two");
+    Path repoTwoStoragePath = repoTwoPath.resolve("storage");
+    Path repoTwoWorkspacePath = repoTwoPath.resolve("workspace");
 
-    private Path depositPath = testReposPath.resolve("deposit");
-    private String depositAIdentifier = "A";
-    private Path depositAPath = Paths.get("A");
+    Path depositPath = testReposPath.resolve("deposit");
+    String depositAIdentifier = "A";
+    Path depositAPath = Paths.get("A");
 
-    private Path stagingPath = testReposPath.resolve("staging");
+    Path stagingPath = testReposPath.resolve("staging");
 
     User testUser = new User("test", "test@example.edu");
 
-    private DepositFactory depositFactory;
-    private ReplicationFactory replicationFactory;
+    @Autowired
+    InfoPackageService infoPackageService;
 
     @Autowired
-    private InfoPackageService infoPackageService;
-
-    @Autowired
-    private RepositoryService repositoryService;
+    RepositoryService repositoryService;
 
     @Autowired
     ReplicaService replicaService;
 
-    private RepositoryClient repoOneClient;
-    private RepositoryClient repoTwoClient;
+    DepositFactory depositFactory;
+    ReplicationFactory replicationFactory;
+
+    RepositoryClient repoOneClient;
+    RepositoryClient repoTwoClient;
 
     void resetDirPath(Path path) {
         if (Files.exists(path)) {
