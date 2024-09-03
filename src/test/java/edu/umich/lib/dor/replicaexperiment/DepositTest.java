@@ -15,7 +15,6 @@ import org.junit.jupiter.api.Test;
 import edu.umich.lib.dor.replicaexperiment.domain.InfoPackage;
 import edu.umich.lib.dor.replicaexperiment.domain.Replica;
 import edu.umich.lib.dor.replicaexperiment.domain.Repository;
-import edu.umich.lib.dor.replicaexperiment.domain.RepositoryType;
 import edu.umich.lib.dor.replicaexperiment.domain.User;
 import edu.umich.lib.dor.replicaexperiment.exception.EntityAlreadyExistsException;
 import edu.umich.lib.dor.replicaexperiment.exception.NoEntityException;
@@ -32,12 +31,14 @@ public class DepositTest {
     RepositoryService repositoryServiceMock;
     ReplicaService replicaServiceMock;
     RepositoryClientRegistry registryMock;
-    OcflFilesystemRepositoryClient clientMock;
-    Replica replicaMock;
-
     Path depositPath;
 
     DepositFactory depositFactory;
+
+    InfoPackage infoPackageMock;
+    Repository repositoryMock;
+    OcflFilesystemRepositoryClient clientMock;
+    Replica replicaMock;
 
     @BeforeEach
     void init() {
@@ -45,9 +46,6 @@ public class DepositTest {
         this.repositoryServiceMock = mock(RepositoryService.class);
         this.replicaServiceMock = mock(ReplicaService.class);
         this.registryMock = mock(RepositoryClientRegistry.class);
-        this.clientMock = mock(OcflFilesystemRepositoryClient.class);
-        this.replicaMock = mock(Replica.class);
-
         this.depositPath = Paths.get("/deposit");
 
         depositFactory = new DepositFactory(
@@ -57,14 +55,17 @@ public class DepositTest {
             registryMock,
             depositPath
         );
+
+        this.infoPackageMock = mock(InfoPackage.class);
+        this.repositoryMock = mock(Repository.class);
+        this.clientMock = mock(OcflFilesystemRepositoryClient.class);
+        this.replicaMock = mock(Replica.class);
     }
 
     @Test
     void depositCanBeCreated() {
         when(packageServiceMock.getInfoPackage("A")).thenReturn(null);
-        when(repositoryServiceMock.getRepository("some_repo")).thenReturn(
-            new Repository("some_repo", RepositoryType.FILE_SYSTEM)
-        );
+        when(repositoryServiceMock.getRepository("some_repo")).thenReturn(repositoryMock);
         when(registryMock.getClient("some_repo")).thenReturn(clientMock);
     
         assertDoesNotThrow(() -> {
@@ -80,9 +81,7 @@ public class DepositTest {
 
     @Test
     void depositSpecifiesPackageThatAlreadyExists() {
-        when(packageServiceMock.getInfoPackage("A")).thenReturn(
-            new InfoPackage("A")
-        );
+        when(packageServiceMock.getInfoPackage("A")).thenReturn(infoPackageMock);
 
         assertThrows(EntityAlreadyExistsException.class, () -> {
             depositFactory.create(
@@ -97,6 +96,7 @@ public class DepositTest {
 
     @Test
     void depositSpecifiesRepositoryThatDoesNotExist() {
+        when(packageServiceMock.getInfoPackage("A")).thenReturn(null);
         when(repositoryServiceMock.getRepository("some_repo")).thenReturn(null);
 
         assertThrows(NoEntityException.class, () -> {
@@ -112,11 +112,8 @@ public class DepositTest {
 
     @Test
     void depositExecutes() {
-        var repository = new Repository("some_repo", RepositoryType.FILE_SYSTEM);
-        var infoPackage = new InfoPackage("A");
-
         when(packageServiceMock.getInfoPackage("A")).thenReturn(null);
-        when(repositoryServiceMock.getRepository("some_repo")).thenReturn(repository);
+        when(repositoryServiceMock.getRepository("some_repo")).thenReturn(repositoryMock);
         when(registryMock.getClient("some_repo")).thenReturn(clientMock);
 
         var deposit = depositFactory.create(
@@ -127,8 +124,8 @@ public class DepositTest {
             "we're good"
         );
 
-        when(packageServiceMock.createInfoPackage("A")).thenReturn(infoPackage);
-        when(replicaServiceMock.createReplica(infoPackage, repository)).thenReturn(replicaMock);
+        when(packageServiceMock.createInfoPackage("A")).thenReturn(infoPackageMock);
+        when(replicaServiceMock.createReplica(infoPackageMock, repositoryMock)).thenReturn(replicaMock);
 
         deposit.execute();
 
@@ -136,6 +133,6 @@ public class DepositTest {
             "A", depositPath.resolve("something"), testUser, "we're good"
         );
         verify(packageServiceMock).createInfoPackage("A");
-        verify(replicaServiceMock).createReplica(infoPackage, repository);
+        verify(replicaServiceMock).createReplica(infoPackageMock, repositoryMock);
     }
 }
