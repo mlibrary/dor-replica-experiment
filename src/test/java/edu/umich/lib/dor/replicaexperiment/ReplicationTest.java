@@ -83,7 +83,7 @@ public class ReplicationTest {
                 "some_other_repo"
             );
         });
-	}
+    }
 
     @Test
     void replicationSpecifiesInfoPackageThatDoesNotExist() {
