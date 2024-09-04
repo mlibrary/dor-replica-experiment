@@ -5,7 +5,6 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import edu.umich.lib.dor.replicaexperiment.domain.Replica;
 import edu.umich.lib.dor.replicaexperiment.domain.Repository;
 import edu.umich.lib.dor.replicaexperiment.domain.RepositoryRepository;
 import edu.umich.lib.dor.replicaexperiment.domain.RepositoryType;
@@ -32,10 +31,5 @@ public class RepositoryService {
 
     public Repository getRepository(String name) {
         return repositoryRepo.findByName(name);
-    }
-
-    public void addReplicaToRepository(Repository repository, Replica replica) {
-        repository.addReplica(replica);
-        repositoryRepo.save(repository);
     }
 }

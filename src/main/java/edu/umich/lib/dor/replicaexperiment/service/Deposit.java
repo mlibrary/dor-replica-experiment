@@ -13,6 +13,7 @@ public class Deposit implements Command {
     ReplicaService replicaService;
     RepositoryClientRegistry repositoryClientRegistry;
     Path depositPath;
+
     Curator curator;
     String packageIdentifier;
     Path sourcePath;

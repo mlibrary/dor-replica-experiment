@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 
 import edu.umich.lib.dor.replicaexperiment.domain.InfoPackage;
 import edu.umich.lib.dor.replicaexperiment.domain.InfoPackageRepository;
-import edu.umich.lib.dor.replicaexperiment.domain.Replica;
 
 @Service
 public class InfoPackageService {
@@ -28,10 +27,5 @@ public class InfoPackageService {
 
     public List<InfoPackage> getAllInfoPackages() {
         return infoPackageRepo.findAll();
-    }
-
-    public void addReplicaToInfoPackage(InfoPackage infoPackage, Replica replica) {
-        infoPackage.addReplica(replica);
-        infoPackageRepo.save(infoPackage);
     }
 }
