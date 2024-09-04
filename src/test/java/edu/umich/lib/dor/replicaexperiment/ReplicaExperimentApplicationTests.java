@@ -11,10 +11,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -52,7 +52,7 @@ import edu.umich.lib.dor.replicaexperiment.service.UpdateFactory;
 @EntityScan(basePackages = {"edu.umich.lib.dor.replicaexperiment.domain"})
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 class ReplicaExperimentApplicationTests {
-    static final Log log = LogFactory.getLog(ReplicaExperimentApplication.class);
+    static final Logger log = LoggerFactory.getLogger(ReplicaExperimentApplication.class);
 
     Path testReposPath = Paths.get("src", "test", "resources", "test_repositories");
     String repoOneName = "repo_one";

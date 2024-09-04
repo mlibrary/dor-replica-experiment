@@ -6,8 +6,8 @@ import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.List;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import io.ocfl.api.OcflOption;
 import io.ocfl.api.OcflRepository;
 import io.ocfl.api.model.FileDetails;
@@ -21,7 +21,7 @@ import edu.umich.lib.dor.replicaexperiment.domain.Curator;
 import edu.umich.lib.dor.replicaexperiment.exception.NoContentException;
 
 public class OcflFilesystemRepositoryClient implements RepositoryClient {
-	private static final Log log = LogFactory.getLog(OcflFilesystemRepositoryClient.class);
+	private static final Logger log = LoggerFactory.getLogger(OcflFilesystemRepositoryClient.class);
 
     private OcflRepository repo;
 
@@ -94,7 +94,7 @@ public class OcflFilesystemRepositoryClient implements RepositoryClient {
             .map(fileDetails -> fileDetails.getPath())
             .map(p -> Paths.get(p))
             .toList();
-        log.debug(filePaths);
+        log.debug(filePaths.toString());
         return filePaths;
     }
 
