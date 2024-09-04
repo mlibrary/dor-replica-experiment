@@ -11,7 +11,7 @@ import edu.umich.lib.dor.replicaexperiment.domain.RepositoryType;
 
 @Service
 public class RepositoryService {
-	private static final Logger log = LoggerFactory.getLogger(RepositoryService.class);
+    private static final Logger log = LoggerFactory.getLogger(RepositoryService.class);
 
     @Autowired
     RepositoryRepository repositoryRepo;
