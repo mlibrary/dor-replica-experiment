@@ -14,7 +14,7 @@ import io.ocfl.api.model.VersionInfo;
 import io.ocfl.core.OcflRepositoryBuilder;
 import io.ocfl.core.extension.storage.layout.config.HashedNTupleLayoutConfig;
 
-import edu.umich.lib.dor.replicaexperiment.domain.User;
+import edu.umich.lib.dor.replicaexperiment.domain.Curator;
 import edu.umich.lib.dor.replicaexperiment.exception.NoContentException;
 
 public class OcflFilesystemRepositoryClient implements RepositoryClient {
@@ -31,8 +31,8 @@ public class OcflFilesystemRepositoryClient implements RepositoryClient {
             .build();
     }
 
-    private VersionInfo createNewVersion(User user, String message) {
-        return new VersionInfo().setUser(user.username(), user.email()).setMessage(message);
+    private VersionInfo createNewVersion(Curator curator, String message) {
+        return new VersionInfo().setUser(curator.username(), curator.email()).setMessage(message);
     }
 
     private void validatePath(Path path) {
@@ -43,12 +43,12 @@ public class OcflFilesystemRepositoryClient implements RepositoryClient {
         }
     }
 
-    public RepositoryClient createObject(String id, Path inputPath, User user, String message) {
+    public RepositoryClient createObject(String id, Path inputPath, Curator curator, String message) {
         validatePath(inputPath);
         repo.putObject(
             ObjectVersionId.head(id),
             inputPath,
-            createNewVersion(user, message)
+            createNewVersion(curator, message)
         );
         return this;
     }
@@ -79,22 +79,24 @@ public class OcflFilesystemRepositoryClient implements RepositoryClient {
         return filePaths;
     }
 
-    public RepositoryClient deleteObjectFile(String objectId, String filePath, User user, String message) {
+    public RepositoryClient deleteObjectFile(
+        String objectId, String filePath, Curator curator, String message
+    ) {
         repo.updateObject(
             ObjectVersionId.head(objectId),
-            createNewVersion(user, message),
+            createNewVersion(curator, message),
             updater -> { updater.removeFile(filePath); }
         );
         return this;
     }
 
     public RepositoryClient updateObjectFile(
-        String objectId, Path inputPath, String filePath, User user, String message
+        String objectId, Path inputPath, String filePath, Curator curator, String message
     ) {
         validatePath(inputPath);
         repo.updateObject(
             ObjectVersionId.head(objectId),
-            createNewVersion(user, message),
+            createNewVersion(curator, message),
             updater -> { updater.addPath(inputPath, filePath, OcflOption.OVERWRITE); }
         );
         return this;

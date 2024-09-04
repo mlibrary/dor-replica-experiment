@@ -2,7 +2,7 @@ package edu.umich.lib.dor.replicaexperiment.service;
 
 import java.nio.file.Path;
 
-import edu.umich.lib.dor.replicaexperiment.domain.User;
+import edu.umich.lib.dor.replicaexperiment.domain.Curator;
 
 public class DepositFactory {
     InfoPackageService infoPackageService;
@@ -26,7 +26,7 @@ public class DepositFactory {
     }
 
     public Deposit create(
-        User user,
+        Curator curator,
         String packageIdentifier,
         Path sourcePath,
         String repositoryName,
@@ -38,7 +38,7 @@ public class DepositFactory {
             replicaService,
             repositoryClientRegistry,
             depositPath,
-            user,
+            curator,
             packageIdentifier,
             sourcePath,
             repositoryName,

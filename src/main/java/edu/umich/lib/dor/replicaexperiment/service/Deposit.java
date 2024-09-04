@@ -2,9 +2,9 @@ package edu.umich.lib.dor.replicaexperiment.service;
 
 import java.nio.file.Path;
 
+import edu.umich.lib.dor.replicaexperiment.domain.Curator;
 import edu.umich.lib.dor.replicaexperiment.domain.Replica;
 import edu.umich.lib.dor.replicaexperiment.domain.Repository;
-import edu.umich.lib.dor.replicaexperiment.domain.User;
 import edu.umich.lib.dor.replicaexperiment.exception.EntityAlreadyExistsException;
 import edu.umich.lib.dor.replicaexperiment.exception.NoEntityException;
 
@@ -14,7 +14,7 @@ public class Deposit implements Command {
     ReplicaService replicaService;
     RepositoryClientRegistry repositoryClientRegistry;
     Path depositPath;
-    User user;
+    Curator curator;
     String packageIdentifier;
     Path sourcePath;
     String repositoryName;
@@ -29,7 +29,7 @@ public class Deposit implements Command {
         ReplicaService replicaService,
         RepositoryClientRegistry repositoryClientRegistry,
         Path depositPath,
-        User user,
+        Curator curator,
         String packageIdentifier,
         Path sourcePath,
         String repositoryName,
@@ -40,7 +40,7 @@ public class Deposit implements Command {
         this.replicaService = replicaService;
         this.repositoryClientRegistry = repositoryClientRegistry;
         this.depositPath = depositPath;
-        this.user = user;
+        this.curator = curator;
         this.packageIdentifier = packageIdentifier;
         this.sourcePath = sourcePath;
         this.repositoryName = repositoryName;
@@ -71,7 +71,7 @@ public class Deposit implements Command {
 
     public void execute() {
         Path fullSourcePath = depositPath.resolve(sourcePath);
-        repositoryClient.createObject(packageIdentifier, fullSourcePath, user, message);
+        repositoryClient.createObject(packageIdentifier, fullSourcePath, curator, message);
 
         var infoPackage = infoPackageService.createInfoPackage(packageIdentifier);
         Replica replica = replicaService.createReplica(infoPackage, repository);
