@@ -20,6 +20,8 @@ public class ReplicaService {
         var replica = new Replica();
         replica.setInfoPackage(infoPackage);
         replica.setRepository(repository);
+        infoPackage.addReplica(replica);
+        repository.addReplica(replica);
         replicaRepo.save(replica);
         return replica;
     }

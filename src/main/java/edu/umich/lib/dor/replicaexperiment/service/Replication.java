@@ -3,7 +3,6 @@ package edu.umich.lib.dor.replicaexperiment.service;
 import java.nio.file.Path;
 
 import edu.umich.lib.dor.replicaexperiment.domain.InfoPackage;
-import edu.umich.lib.dor.replicaexperiment.domain.Replica;
 import edu.umich.lib.dor.replicaexperiment.domain.Repository;
 import edu.umich.lib.dor.replicaexperiment.exception.NoEntityException;
 
@@ -86,9 +85,8 @@ public class Replication implements Command {
         Path objectPathInStaging = stagingPath.resolve(packageIdentifier);
         sourceRepositoryClient.exportObject(packageIdentifier, objectPathInStaging);
         targetRepositoryClient.importObject(objectPathInStaging);
+
         targetRepository = repositoryService.getRepository(targetRepositoryName);
-        Replica replica = replicaService.createReplica(infoPackage, targetRepository);
-        infoPackage.addReplica(replica);
-        targetRepository.addReplica(replica);
+        replicaService.createReplica(infoPackage, targetRepository);
     }
 }
