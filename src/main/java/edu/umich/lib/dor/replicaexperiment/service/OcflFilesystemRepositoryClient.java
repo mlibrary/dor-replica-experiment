@@ -2,12 +2,15 @@ package edu.umich.lib.dor.replicaexperiment.service;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Collection;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import io.ocfl.api.OcflOption;
 import io.ocfl.api.OcflRepository;
+import io.ocfl.api.model.FileDetails;
 import io.ocfl.api.model.ObjectDetails;
 import io.ocfl.api.model.ObjectVersionId;
 import io.ocfl.api.model.VersionInfo;
@@ -67,13 +70,29 @@ public class OcflFilesystemRepositoryClient implements RepositoryClient {
         return repo.containsObject(id);
     }
 
-    public List<String> getFilePaths(String id) {
+    private Collection<FileDetails> getFiles(String id) {
         ObjectDetails objectDetails = repo.describeObject(id);
-        var filePaths = objectDetails
+        var files = objectDetails
             .getHeadVersion()
-            .getFiles()
+            .getFiles();
+        return files;
+    }
+
+    public List<Path> getStorageFilePaths(String id) {
+        var filePaths = getFiles(id)
             .stream()
             .map(fileDetails -> { return fileDetails.getStorageRelativePath(); })
+            .map(p -> { return Paths.get(p); })
+            .toList();
+        log.debug(filePaths);
+        return filePaths;
+    }
+
+    public List<Path> getFilePaths(String id) {
+        var filePaths = getFiles(id)
+            .stream()
+            .map(fileDetails -> { return fileDetails.getPath(); })
+            .map(p -> { return Paths.get(p); })
             .toList();
         log.debug(filePaths);
         return filePaths;
@@ -90,14 +109,21 @@ public class OcflFilesystemRepositoryClient implements RepositoryClient {
         return this;
     }
 
-    public RepositoryClient updateObjectFile(
-        String objectId, Path inputPath, String filePath, Curator curator, String message
+    public RepositoryClient updateObjectFiles(
+        String objectId, Path updatePackagePath, List<Path> inputPaths, Curator curator, String message
     ) {
-        validatePath(inputPath);
         repo.updateObject(
             ObjectVersionId.head(objectId),
             createNewVersion(curator, message),
-            updater -> { updater.addPath(inputPath, filePath, OcflOption.OVERWRITE); }
+            updater -> {
+                for (Path inputPath: inputPaths) {
+                    updater.addPath(
+                        updatePackagePath.resolve(inputPath),
+                        inputPath.toString(),
+                        OcflOption.OVERWRITE
+                    );
+                }
+            }
         );
         return this;
     }

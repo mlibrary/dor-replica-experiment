@@ -21,6 +21,8 @@ import edu.umich.lib.dor.replicaexperiment.service.DepositFactory;
 import edu.umich.lib.dor.replicaexperiment.service.InfoPackageService;
 import edu.umich.lib.dor.replicaexperiment.service.Replication;
 import edu.umich.lib.dor.replicaexperiment.service.ReplicationFactory;
+import edu.umich.lib.dor.replicaexperiment.service.Update;
+import edu.umich.lib.dor.replicaexperiment.service.UpdateFactory;
 
 @Controller
 @RequestMapping(path="/package")
@@ -36,6 +38,9 @@ public class InfoPackageController {
     @Autowired
     private ReplicationFactory replicationFactory;
 
+    @Autowired
+    private UpdateFactory updateFactory;
+
     @PostMapping(path="/deposit")
     public @ResponseBody InfoPackageDto deposit(
         @RequestParam String identifier,
@@ -48,6 +53,22 @@ public class InfoPackageController {
             testCurator, identifier, sourcePathRelativeToDeposit, repository, message
         );
         deposit.execute();
+        var newInfoPackage = infoPackageService.getInfoPackage(identifier);
+        return new InfoPackageDto(newInfoPackage);
+    }
+
+    @PostMapping(path="/update")
+    public @ResponseBody InfoPackageDto update(
+        @RequestParam String identifier,
+        @RequestParam String depositSourcePath,
+        @RequestParam String repository,
+        @RequestParam String message
+    ) {
+        Path sourcePathRelativeToDeposit = Paths.get(depositSourcePath);
+        Update update = updateFactory.create(
+            testCurator, identifier, sourcePathRelativeToDeposit, repository, message
+        );
+        update.execute();
         var newInfoPackage = infoPackageService.getInfoPackage(identifier);
         return new InfoPackageDto(newInfoPackage);
     }

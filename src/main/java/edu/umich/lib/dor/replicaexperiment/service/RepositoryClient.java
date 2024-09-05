@@ -16,11 +16,13 @@ public interface RepositoryClient {
 
     RepositoryClient deleteObjectFile(String objectId, String filePath, Curator curator, String message);
 
-    RepositoryClient updateObjectFile(
-        String objectId, Path inputPath, String filePath, Curator curator, String message
+    RepositoryClient updateObjectFiles(
+        String objectId, Path updatePackagePath, List<Path> inputPaths, Curator curator, String message
     );
 
-    List<String> getFilePaths(String id);
+    List<Path> getFilePaths(String id);
+
+    List<Path> getStorageFilePaths(String id);
 
     RepositoryClient importObject(Path inputPath);
 
