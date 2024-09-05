@@ -11,6 +11,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
+import edu.umich.lib.dor.replicaexperiment.service.DepositDirectory;
 import edu.umich.lib.dor.replicaexperiment.service.DepositFactory;
 import edu.umich.lib.dor.replicaexperiment.service.InfoPackageService;
 import edu.umich.lib.dor.replicaexperiment.service.OcflFilesystemRepositoryClient;
@@ -19,6 +20,7 @@ import edu.umich.lib.dor.replicaexperiment.service.ReplicationFactory;
 import edu.umich.lib.dor.replicaexperiment.service.RepositoryClient;
 import edu.umich.lib.dor.replicaexperiment.service.RepositoryClientRegistry;
 import edu.umich.lib.dor.replicaexperiment.service.RepositoryService;
+import edu.umich.lib.dor.replicaexperiment.service.UpdateFactory;
 
 @Configuration
 @ComponentScan("edu.umich.lib.dor.replicaexperiment.service")
@@ -86,6 +88,26 @@ public class AppConfig {
             replicaService,
             repositoryClientRegistry,
             depositPath
+        );
+    }
+
+    @Bean
+    public UpdateFactory updateFactory(
+        RepositoryClientRegistry repositoryClientRegistry,
+        RepositoryService repositoryService,
+        InfoPackageService infoPackageService,
+        ReplicaService replicaService,
+        Environment environment
+    ) {
+        Path depositPath = Paths.get(
+            environment.getRequiredProperty("repository.deposit.path")
+        );
+        return new UpdateFactory(
+            infoPackageService,
+            repositoryService,
+            replicaService,
+            repositoryClientRegistry,
+            new DepositDirectory(depositPath)
         );
     }
 

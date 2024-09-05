@@ -5,6 +5,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -28,7 +30,9 @@ import edu.umich.lib.dor.replicaexperiment.domain.Curator;
 import edu.umich.lib.dor.replicaexperiment.domain.InfoPackage;
 import edu.umich.lib.dor.replicaexperiment.domain.Replica;
 import edu.umich.lib.dor.replicaexperiment.domain.Repository;
+import edu.umich.lib.dor.replicaexperiment.service.ChecksumCalculator;
 import edu.umich.lib.dor.replicaexperiment.service.Deposit;
+import edu.umich.lib.dor.replicaexperiment.service.DepositDirectory;
 import edu.umich.lib.dor.replicaexperiment.service.DepositFactory;
 import edu.umich.lib.dor.replicaexperiment.service.InfoPackageService;
 import edu.umich.lib.dor.replicaexperiment.service.OcflFilesystemRepositoryClient;
@@ -37,6 +41,8 @@ import edu.umich.lib.dor.replicaexperiment.service.ReplicationFactory;
 import edu.umich.lib.dor.replicaexperiment.service.RepositoryClient;
 import edu.umich.lib.dor.replicaexperiment.service.RepositoryClientRegistry;
 import edu.umich.lib.dor.replicaexperiment.service.RepositoryService;
+import edu.umich.lib.dor.replicaexperiment.service.Update;
+import edu.umich.lib.dor.replicaexperiment.service.UpdateFactory;
 
 @Import(TestcontainersConfiguration.class)
 @DataJpaTest
@@ -59,8 +65,11 @@ class ReplicaExperimentApplicationTests {
     Path repoTwoWorkspacePath = repoTwoPath.resolve("workspace");
 
     Path depositPath = testReposPath.resolve("deposit");
+    DepositDirectory depositDir = new DepositDirectory(depositPath);
+
     String depositAIdentifier = "A";
     Path depositAPath = Paths.get("A");
+    Path updateAPath = Paths.get("Update_A");
 
     Path stagingPath = testReposPath.resolve("staging");
 
@@ -77,6 +86,7 @@ class ReplicaExperimentApplicationTests {
 
     DepositFactory depositFactory;
     ReplicationFactory replicationFactory;
+    UpdateFactory updateFactory;
 
     RepositoryClient repoOneClient;
     RepositoryClient repoTwoClient;
@@ -120,6 +130,9 @@ class ReplicaExperimentApplicationTests {
         this.replicationFactory = new ReplicationFactory(
             infoPackageService, repositoryService, replicaService, registry, stagingPath
         );
+        this.updateFactory = new UpdateFactory(
+            infoPackageService, repositoryService, replicaService, registry, depositDir
+        );
     }
 
     @Test
@@ -144,8 +157,8 @@ class ReplicaExperimentApplicationTests {
         assertEquals(1, infoPackageA.getReplicas().size());
         assertTrue(infoPackageA.hasAReplicaIn(repoOneName));
 
-        List<String> filePaths = repoOneClient.getFilePaths(depositAIdentifier);
-        for (String filePath: filePaths) {
+        List<Path> filePaths = repoOneClient.getStorageFilePaths(depositAIdentifier);
+        for (Path filePath: filePaths) {
             Path fullPath = repoOneStoragePath.resolve(filePath);
             assertTrue(Files.exists(fullPath));
         }
@@ -170,10 +183,49 @@ class ReplicaExperimentApplicationTests {
             assertEquals(depositAIdentifier, repoTwoReplica.getInfoPackage().getIdentifier());
         }
 
-        List<String> filePaths = repoTwoClient.getFilePaths(depositAIdentifier);
-        for (String filePath: filePaths) {
+        List<Path> filePaths = repoTwoClient.getStorageFilePaths(depositAIdentifier);
+        for (Path filePath: filePaths) {
             Path fullPath = repoTwoStoragePath.resolve(filePath);
             assertTrue(Files.exists(fullPath));
+        }
+    }
+
+    @Test
+    void updateModifiesFilesInRepository() {
+        Deposit deposit = depositFactory.create(
+            testCurator, depositAIdentifier, depositAPath, repoOneName, "first version!!!"
+        );
+        deposit.execute();
+
+        Update update = updateFactory.create(
+            testCurator, depositAIdentifier, updateAPath, repoOneName, "second version!!!"
+        );
+        update.execute();
+
+        List<Path> updateFilePaths = depositDir.getFilePaths(updateAPath);
+        List<Path> packageFilePaths = repoOneClient.getFilePaths(depositAIdentifier);
+        assertTrue(Set.copyOf(packageFilePaths).containsAll(Set.copyOf(updateFilePaths)));
+
+        List<Path> storageFilePaths = repoOneClient.getStorageFilePaths(depositAIdentifier);
+        for (Path storageFilePath: storageFilePaths) {
+            Path fullPath = repoOneStoragePath.resolve(storageFilePath);
+            assertTrue(Files.exists(fullPath));
+        }
+
+        for (Path updateFilePath: updateFilePaths) {
+            Path fullUpdateFilePath = depositDir.getDepositPath()
+                .resolve(updateAPath)
+                .resolve(updateFilePath);
+            String updateFileChecksum = ChecksumCalculator.calculate(fullUpdateFilePath);
+            Optional<Path> maybeStoragePath = storageFilePaths.stream()
+                .filter(p -> p.endsWith(updateFilePath))
+                .findFirst();
+            assertTrue(maybeStoragePath.isPresent());
+            if (maybeStoragePath.isPresent()) {
+                Path fullMatchingStoragePath = repoOneStoragePath.resolve(maybeStoragePath.get());
+                String storageFileChecksum = ChecksumCalculator.calculate(fullMatchingStoragePath);
+                assertEquals(updateFileChecksum, storageFileChecksum);
+            }
         }
     }
 }
