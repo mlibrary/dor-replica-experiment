@@ -36,10 +36,10 @@ public class InfoPackageController {
     private DepositFactory depositFactory;
 
     @Autowired
-    private ReplicationFactory replicationFactory;
+    private UpdateFactory updateFactory;
 
     @Autowired
-    private UpdateFactory updateFactory;
+    private ReplicationFactory replicationFactory;
 
     @PostMapping(path="/deposit")
     public @ResponseBody InfoPackageDto deposit(

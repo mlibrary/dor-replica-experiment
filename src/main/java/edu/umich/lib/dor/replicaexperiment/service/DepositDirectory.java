@@ -26,7 +26,6 @@ public class DepositDirectory {
         try {
             List<Path> paths = Files.walk(fullPath)
                 .filter(p -> Files.isRegularFile(p))
-                .map(p -> fullPath.relativize(p))
                 .toList();
             return paths;
         } catch(IOException e) {
@@ -34,5 +33,13 @@ public class DepositDirectory {
             log.error(message);
             throw new IllegalArgumentException(message);
         }
+    }
+
+    public List<Path> getPackageFilePaths(Path packagePath) {
+        var fullPath = depositPath.resolve(packagePath);
+        return getFilePaths(packagePath)
+            .stream()
+            .map(p -> fullPath.relativize(p))
+            .toList();
     }
 }

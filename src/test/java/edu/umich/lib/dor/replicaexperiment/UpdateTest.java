@@ -81,7 +81,7 @@ public class UpdateTest {
         when(infoPackageMock.hasAReplicaIn("some_repo")).thenReturn(true);
 
         when(registryMock.getClient("some_repo")).thenReturn(clientMock);
-        when(depositDir.getFilePaths(depositUpdatePath)).thenReturn(
+        when(depositDir.getPackageFilePaths(depositUpdatePath)).thenReturn(
             List.of(
                 Paths.get("something.txt"),
                 Paths.get("something_new.txt")
@@ -108,7 +108,7 @@ public class UpdateTest {
     }
 
     @Test
-	void updateFailsWhenInfoPackageDoesNotExist () {
+    void updateFailsWhenInfoPackageDoesNotExist () {
         when(packageServiceMock.getInfoPackage("A")).thenReturn(null);
 
         assertThrows(NoEntityException.class, () -> {
@@ -124,7 +124,7 @@ public class UpdateTest {
 
 
     @Test
-	void updateFailsWhenRepositoryDoesNotExist () {
+    void updateFailsWhenRepositoryDoesNotExist () {
         when(packageServiceMock.getInfoPackage("A")).thenReturn(infoPackageMock);
         when(repositoryServiceMock.getRepository("some_repo")).thenReturn(null);
 
@@ -140,7 +140,7 @@ public class UpdateTest {
     }
 
     @Test
-	void updateFailsWhenPackageDoesNotExistHaveReplicaInRepository() {
+    void updateFailsWhenPackageDoesNotExistHaveReplicaInRepository() {
         when(packageServiceMock.getInfoPackage("A")).thenReturn(infoPackageMock);
         when(repositoryServiceMock.getRepository("some_repo")).thenReturn(repositoryMock);
         when(registryMock.getClient("some_repo")).thenReturn(clientMock);
@@ -158,7 +158,7 @@ public class UpdateTest {
     }
 
     @Test
-	void updateExecutes() {
+    void updateExecutes() {
         when(packageServiceMock.getInfoPackage("A")).thenReturn(infoPackageMock);
         when(repositoryServiceMock.getRepository("some_repo")).thenReturn(repositoryMock);
         when(registryMock.getClient("some_repo")).thenReturn(clientMock);
@@ -170,7 +170,7 @@ public class UpdateTest {
         );
 
         when(depositDir.getDepositPath()).thenReturn(Paths.get("some/path"));
-        when(depositDir.getFilePaths(updatePackagePath)).thenReturn(newPackagePaths);
+        when(depositDir.getPackageFilePaths(updatePackagePath)).thenReturn(newPackagePaths);
         when(clientMock.getFilePaths("A")).thenReturn(
             List.of(
                 Paths.get("something.txt"),
