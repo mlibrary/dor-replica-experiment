@@ -28,8 +28,7 @@ public class DepositDirectoryTest {
         Set<Path> expectedSet = Set.of(
             Paths.get("A.txt"), Paths.get("B/B.txt"), Paths.get("C/D/D.txt")
         );
-        System.out.println(expectedSet);
-        List<Path> paths = depositDir.getFilePaths(Paths.get("deposit_one"));
+        List<Path> paths = depositDir.getPackageFilePaths(Paths.get("deposit_one"));
         var pathSet = Set.copyOf(paths);
         assertTrue(expectedSet.equals(pathSet));
     }

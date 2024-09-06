@@ -77,7 +77,7 @@ public class Update implements Command {
             );
         }
 
-        this.updateFilePaths = depositDir.getFilePaths(sourcePath);
+        this.updateFilePaths = depositDir.getPackageFilePaths(sourcePath);
         this.updatePackagePath = depositDir.getDepositPath().resolve(sourcePath);
     }
 
