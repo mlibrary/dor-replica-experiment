@@ -194,5 +194,6 @@ public class UpdateTest {
         verify(clientMock).updateObjectFiles(
             "A", fullUpdatePackagePath, newPackagePaths, testCurator, "we're good"
         );
+        verify(replicaServiceMock).updateReplica(infoPackageMock, repositoryMock);
     }
 }

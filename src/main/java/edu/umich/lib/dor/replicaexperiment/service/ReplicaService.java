@@ -1,6 +1,7 @@
 package edu.umich.lib.dor.replicaexperiment.service;
 
 import java.util.List;
+import java.time.Instant;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,6 +21,7 @@ public class ReplicaService {
         var replica = new Replica();
         replica.setInfoPackage(infoPackage);
         replica.setRepository(repository);
+        replica.setUpdatedAt(Instant.now());
         infoPackage.addReplica(replica);
         repository.addReplica(replica);
         replicaRepo.save(replica);
@@ -28,5 +30,24 @@ public class ReplicaService {
 
     public List<Replica> getReplicas() {
         return replicaRepo.findAll();
+    }
+
+    public Replica getReplica(
+        InfoPackage infoPackage, Repository repository
+    ) {
+        var matchingReplicas = replicaRepo.findAllByInfoPackage(infoPackage)
+            .stream()
+            .filter(r -> r.getRepository().getId() == repository.getId())
+            .toList();
+        return matchingReplicas.getFirst();
+    }
+
+    public Replica updateReplica(
+        InfoPackage infoPackage, Repository repository
+    ) {
+        var replica = getReplica(infoPackage, repository);
+        replica.setUpdatedAt(Instant.now());
+        replicaRepo.save(replica);
+        return replica;
     }
 }
