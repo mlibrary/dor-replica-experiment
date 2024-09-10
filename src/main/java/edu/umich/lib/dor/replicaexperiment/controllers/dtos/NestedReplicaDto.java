@@ -7,11 +7,13 @@ import edu.umich.lib.dor.replicaexperiment.domain.Replica;
 public class NestedReplicaDto {
     private Long id;
     private Instant createdAt;
+    private Instant updatedAt;
     private NestedRepositoryDto repository;
 
     public NestedReplicaDto(Replica replica) {
         this.id = replica.getId();
         this.createdAt = replica.getCreatedAt();
+        this.updatedAt = replica.getUpdatedAt();
         this.repository = new NestedRepositoryDto(replica.getRepository());
     }
 
@@ -21,6 +23,10 @@ public class NestedReplicaDto {
 
     public Instant getCreatedAt() {
         return createdAt;
+    }
+
+    public Instant getUpdatedAt() {
+        return updatedAt;
     }
 
     public NestedRepositoryDto getRepository() {

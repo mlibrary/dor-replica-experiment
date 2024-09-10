@@ -5,6 +5,7 @@ import java.nio.file.Path;
 
 import edu.umich.lib.dor.replicaexperiment.domain.Repository;
 import edu.umich.lib.dor.replicaexperiment.domain.Curator;
+import edu.umich.lib.dor.replicaexperiment.domain.InfoPackage;
 import edu.umich.lib.dor.replicaexperiment.exception.NoEntityException;
 
 public class Update implements Command {
@@ -19,6 +20,7 @@ public class Update implements Command {
     String repositoryName;
     String message;
 
+    InfoPackage existingPackage;
     Repository repository;
     RepositoryClient repositoryClient;
     Path updatePackagePath;
@@ -47,7 +49,7 @@ public class Update implements Command {
         this.repositoryName = repositoryName;
         this.message = message;
 
-        var existingPackage = infoPackageService.getInfoPackage(packageIdentifier);
+        this.existingPackage = infoPackageService.getInfoPackage(packageIdentifier);
         if (existingPackage == null) {
             throw new NoEntityException(
                 String.format(
@@ -85,5 +87,6 @@ public class Update implements Command {
         repositoryClient.updateObjectFiles(
             packageIdentifier, updatePackagePath, updateFilePaths, curator, message
         );
+        replicaService.updateReplica(existingPackage, repository);
     }
 }

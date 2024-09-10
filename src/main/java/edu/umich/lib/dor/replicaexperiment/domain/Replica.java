@@ -24,6 +24,8 @@ public class Replica {
     @CreationTimestamp()
     private Instant createdAt;
 
+    private Instant updatedAt;
+
     public Replica() {}
     
     public void setInfoPackage(InfoPackage infoPackage) {
@@ -60,4 +62,13 @@ public class Replica {
     public Instant getCreatedAt() {
         return createdAt;
     }
+
+    public Instant getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(Instant updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
 }
