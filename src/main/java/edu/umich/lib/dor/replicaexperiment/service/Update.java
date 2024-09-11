@@ -23,6 +23,7 @@ public class Update implements Command {
     InfoPackage existingPackage;
     Repository repository;
     RepositoryClient repositoryClient;
+    Package sourcePackage;
     Path updatePackagePath;
     List<Path> updateFilePaths;
 
@@ -79,13 +80,16 @@ public class Update implements Command {
             );
         }
 
-        this.updateFilePaths = depositDir.getPackageFilePaths(sourcePath);
-        this.updatePackagePath = depositDir.getDepositPath().resolve(sourcePath);
+        this.sourcePackage = depositDir.getPackage(sourcePath);
     }
 
     public void execute() {
         repositoryClient.updateObjectFiles(
-            packageIdentifier, updatePackagePath, updateFilePaths, curator, message
+            packageIdentifier,
+            sourcePackage.getRootPath(),
+            sourcePackage.getFilePaths(),
+            curator,
+            message
         );
         replicaService.updateReplica(existingPackage, repository);
     }
