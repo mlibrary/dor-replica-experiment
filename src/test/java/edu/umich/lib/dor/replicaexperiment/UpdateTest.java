@@ -4,8 +4,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -21,6 +20,7 @@ import edu.umich.lib.dor.replicaexperiment.exception.NoEntityException;
 import edu.umich.lib.dor.replicaexperiment.service.DepositDirectory;
 import edu.umich.lib.dor.replicaexperiment.service.InfoPackageService;
 import edu.umich.lib.dor.replicaexperiment.service.OcflFilesystemRepositoryClient;
+import edu.umich.lib.dor.replicaexperiment.service.Package;
 import edu.umich.lib.dor.replicaexperiment.service.ReplicaService;
 import edu.umich.lib.dor.replicaexperiment.service.RepositoryClientRegistry;
 import edu.umich.lib.dor.replicaexperiment.service.RepositoryService;
@@ -40,11 +40,10 @@ public class UpdateTest {
     Repository repositoryMock;
     Replica replicaMock;
     OcflFilesystemRepositoryClient clientMock;
-    DepositDirectory depositDir;
+    DepositDirectory depositDirMock;
+    Package sourcePackageMock;
 
     UpdateFactory updateFactory;
-
-    Path updatePackagePath;
 
     @BeforeEach
     void init() {
@@ -59,48 +58,32 @@ public class UpdateTest {
         this.clientMock = mock(OcflFilesystemRepositoryClient.class);
 
         this.depositPath = Paths.get("/deposit");
-        this.depositDir = mock(DepositDirectory.class);
+        this.depositDirMock = mock(DepositDirectory.class);
+        this.sourcePackageMock = mock(Package.class);
 
-        updateFactory = new UpdateFactory(
+        this.updateFactory = new UpdateFactory(
             packageServiceMock,
             repositoryServiceMock,
             replicaServiceMock,
             registryMock,
-            depositDir
+            depositDirMock
         );
-
-        this.updatePackagePath = Paths.get("update_A");
     }
 
     @Test
-	void updateCanBeCreated() {
-        Path depositUpdatePath = Paths.get("update_A");
-
+    void updateCanBeCreated() {
         when(packageServiceMock.getInfoPackage("A")).thenReturn(infoPackageMock);
         when(repositoryServiceMock.getRepository("some_repo")).thenReturn(repositoryMock);
         when(infoPackageMock.hasAReplicaIn("some_repo")).thenReturn(true);
 
         when(registryMock.getClient("some_repo")).thenReturn(clientMock);
-        when(depositDir.getPackageFilePaths(depositUpdatePath)).thenReturn(
-            List.of(
-                Paths.get("something.txt"),
-                Paths.get("something_new.txt")
-            )
-        );
-        when(depositDir.getDepositPath()).thenReturn(Paths.get("some/path"));
-        when(clientMock.getFilePaths("A")).thenReturn(
-            List.of(
-                Paths.get("something.txt"),
-                Paths.get("something_else.txt"),
-                Paths.get("special.txt")
-            )
-        );
+        when(depositDirMock.getPackage(Paths.get("update_A"))).thenReturn(sourcePackageMock);
     
         assertDoesNotThrow(() -> {
             updateFactory.create(
                 testCurator,
                 "A",
-                depositUpdatePath,
+                Paths.get("update_A"),
                 "some_repo",
                 "we're good"
             );
@@ -108,14 +91,14 @@ public class UpdateTest {
     }
 
     @Test
-    void updateFailsWhenInfoPackageDoesNotExist () {
+    void updateFailsWhenInfoPackageDoesNotExist() {
         when(packageServiceMock.getInfoPackage("A")).thenReturn(null);
 
         assertThrows(NoEntityException.class, () -> {
             updateFactory.create(
                 testCurator,
                 "A",
-                updatePackagePath,
+                Paths.get("update_A"),
                 "some_repo",
                 "did I not add this yet?"
             );
@@ -124,7 +107,7 @@ public class UpdateTest {
 
 
     @Test
-    void updateFailsWhenRepositoryDoesNotExist () {
+    void updateFailsWhenRepositoryDoesNotExist() {
         when(packageServiceMock.getInfoPackage("A")).thenReturn(infoPackageMock);
         when(repositoryServiceMock.getRepository("some_repo")).thenReturn(null);
 
@@ -132,7 +115,7 @@ public class UpdateTest {
             updateFactory.create(
                 testCurator,
                 "A",
-                updatePackagePath,
+                Paths.get("update_A"),
                 "some_repo",
                 "was there a some_repo?"
             );
@@ -150,7 +133,7 @@ public class UpdateTest {
             updateFactory.create(
                 testCurator,
                 "A",
-                updatePackagePath,
+                Paths.get("update_A"),
                 "some_repo",
                 "did I not add this yet?"
             );
@@ -169,30 +152,26 @@ public class UpdateTest {
             Paths.get("something_new.txt")
         );
 
-        when(depositDir.getDepositPath()).thenReturn(Paths.get("some/path"));
-        when(depositDir.getPackageFilePaths(updatePackagePath)).thenReturn(newPackagePaths);
-        when(clientMock.getFilePaths("A")).thenReturn(
-            List.of(
-                Paths.get("something.txt"),
-                Paths.get("something_else.txt"),
-                Paths.get("special.txt")
-            )
-        );
+        when(depositDirMock.getPackage(Paths.get("update_A"))).thenReturn(sourcePackageMock);
+        when(sourcePackageMock.getRootPath()).thenReturn(Paths.get("some/path/update_A"));
+        when(sourcePackageMock.getFilePaths()).thenReturn(newPackagePaths);
 
         Update update = updateFactory.create(
             testCurator,
             "A",
-            updatePackagePath,
+            Paths.get("update_A"),
             "some_repo",
             "we're good"
         );
 
         update.execute();
 
-        Path fullUpdatePackagePath = depositDir.getDepositPath().resolve(updatePackagePath);
-
         verify(clientMock).updateObjectFiles(
-            "A", fullUpdatePackagePath, newPackagePaths, testCurator, "we're good"
+            "A",
+            Paths.get("some/path/update_A"),
+            newPackagePaths,
+            testCurator,
+            "we're good"
         );
         verify(replicaServiceMock).updateReplica(infoPackageMock, repositoryMock);
     }

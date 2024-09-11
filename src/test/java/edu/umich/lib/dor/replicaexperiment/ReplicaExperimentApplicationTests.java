@@ -202,17 +202,17 @@ class ReplicaExperimentApplicationTests {
         );
         update.execute();
 
-        List<Path> updateFilePaths = depositDir.getPackageFilePaths(updateAPath);
+        List<Path> updateFilePaths = depositDir.getPackage(updateAPath).getFilePaths();
         List<Path> packageFilePaths = repoOneClient.getFilePaths(depositAIdentifier);
         assertTrue(Set.copyOf(packageFilePaths).containsAll(Set.copyOf(updateFilePaths)));
 
         List<Path> storageFilePaths = repoOneClient.getStorageFilePaths(depositAIdentifier);
-        for (Path storageFilePath: storageFilePaths) {
+        for (Path storageFilePath : storageFilePaths) {
             Path fullPath = repoOneStoragePath.resolve(storageFilePath);
             assertTrue(Files.exists(fullPath));
         }
 
-        for (Path updateFilePath: updateFilePaths) {
+        for (Path updateFilePath : updateFilePaths) {
             Path fullUpdateFilePath = depositDir.getDepositPath()
                 .resolve(updateAPath)
                 .resolve(updateFilePath);
