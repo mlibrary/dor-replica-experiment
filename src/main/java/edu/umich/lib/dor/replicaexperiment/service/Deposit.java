@@ -12,7 +12,7 @@ public class Deposit implements Command {
     RepositoryService repositoryService;
     ReplicaService replicaService;
     RepositoryClientRegistry repositoryClientRegistry;
-    Path depositPath;
+    DepositDirectory depositDir;
 
     Curator curator;
     String packageIdentifier;
@@ -28,18 +28,19 @@ public class Deposit implements Command {
         RepositoryService repositoryService,
         ReplicaService replicaService,
         RepositoryClientRegistry repositoryClientRegistry,
-        Path depositPath,
+        DepositDirectory depositDir,
         Curator curator,
         String packageIdentifier,
         Path sourcePath,
         String repositoryName,
         String message
     ) {
+        this.depositDir = depositDir;
+
         this.infoPackageService = infoPackageService;
         this.repositoryService = repositoryService;
         this.replicaService = replicaService;
         this.repositoryClientRegistry = repositoryClientRegistry;
-        this.depositPath = depositPath;
 
         this.curator = curator;
         this.packageIdentifier = packageIdentifier;
@@ -51,7 +52,7 @@ public class Deposit implements Command {
         if (existingPackage != null) {
             throw new EntityAlreadyExistsException(
                 String.format(
-                    "A package with identifier \"%s\" already exists",
+                    "A package with identifier \"%s\" already exists.",
                     packageIdentifier
                 )
             );
@@ -71,8 +72,10 @@ public class Deposit implements Command {
     }
 
     public void execute() {
-        Path fullSourcePath = depositPath.resolve(sourcePath);
-        repositoryClient.createObject(packageIdentifier, fullSourcePath, curator, message);
+        Package sourcePackage = depositDir.getPackage(sourcePath);
+        repositoryClient.createObject(
+            packageIdentifier, sourcePackage.getRootPath(), curator, message
+        );
 
         var infoPackage = infoPackageService.createInfoPackage(packageIdentifier);
         replicaService.createReplica(infoPackage, repository);

@@ -125,7 +125,7 @@ class ReplicaExperimentApplicationTests {
         }
 
         this.depositFactory = new DepositFactory(
-            infoPackageService, repositoryService, replicaService, registry, depositPath
+            infoPackageService, repositoryService, replicaService, registry, depositDir
         );
         this.replicationFactory = new ReplicationFactory(
             infoPackageService, repositoryService, replicaService, registry, stagingPath

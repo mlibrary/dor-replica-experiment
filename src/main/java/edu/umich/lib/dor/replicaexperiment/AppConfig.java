@@ -87,7 +87,7 @@ public class AppConfig {
             repositoryService,
             replicaService,
             repositoryClientRegistry,
-            depositPath
+            new DepositDirectory(depositPath)
         );
     }
 
