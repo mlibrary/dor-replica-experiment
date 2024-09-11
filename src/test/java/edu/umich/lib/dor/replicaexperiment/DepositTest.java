@@ -18,9 +18,11 @@ import edu.umich.lib.dor.replicaexperiment.domain.Replica;
 import edu.umich.lib.dor.replicaexperiment.domain.Repository;
 import edu.umich.lib.dor.replicaexperiment.exception.EntityAlreadyExistsException;
 import edu.umich.lib.dor.replicaexperiment.exception.NoEntityException;
+import edu.umich.lib.dor.replicaexperiment.service.DepositDirectory;
 import edu.umich.lib.dor.replicaexperiment.service.DepositFactory;
 import edu.umich.lib.dor.replicaexperiment.service.InfoPackageService;
 import edu.umich.lib.dor.replicaexperiment.service.OcflFilesystemRepositoryClient;
+import edu.umich.lib.dor.replicaexperiment.service.Package;
 import edu.umich.lib.dor.replicaexperiment.service.ReplicaService;
 import edu.umich.lib.dor.replicaexperiment.service.RepositoryClientRegistry;
 import edu.umich.lib.dor.replicaexperiment.service.RepositoryService;
@@ -32,6 +34,8 @@ public class DepositTest {
     ReplicaService replicaServiceMock;
     RepositoryClientRegistry registryMock;
     Path depositPath;
+    DepositDirectory depositDirMock;
+    Package packageMock;
 
     DepositFactory depositFactory;
 
@@ -46,14 +50,15 @@ public class DepositTest {
         this.repositoryServiceMock = mock(RepositoryService.class);
         this.replicaServiceMock = mock(ReplicaService.class);
         this.registryMock = mock(RepositoryClientRegistry.class);
-        this.depositPath = Paths.get("/deposit");
+        this.depositDirMock = mock(DepositDirectory.class);
+        this.packageMock = mock(Package.class);
 
         depositFactory = new DepositFactory(
             packageServiceMock,
             repositoryServiceMock,
             replicaServiceMock,
             registryMock,
-            depositPath
+            depositDirMock
         );
 
         this.infoPackageMock = mock(InfoPackage.class);
@@ -124,13 +129,16 @@ public class DepositTest {
             "we're good"
         );
 
+        when(depositDirMock.getPackage(Paths.get("something"))).thenReturn(packageMock);
+        when(packageMock.getRootPath()).thenReturn(Paths.get("deposit/something"));
         when(packageServiceMock.createInfoPackage("A")).thenReturn(infoPackageMock);
-        when(replicaServiceMock.createReplica(infoPackageMock, repositoryMock)).thenReturn(replicaMock);
+        when(replicaServiceMock.createReplica(infoPackageMock, repositoryMock))
+            .thenReturn(replicaMock);
 
         deposit.execute();
 
         verify(clientMock).createObject(
-            "A", depositPath.resolve("something"), testCurator, "we're good"
+            "A", Paths.get("deposit/something"), testCurator, "we're good"
         );
         verify(packageServiceMock).createInfoPackage("A");
         verify(replicaServiceMock).createReplica(infoPackageMock, repositoryMock);

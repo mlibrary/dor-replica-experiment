@@ -10,19 +10,20 @@ public class DepositFactory {
     ReplicaService replicaService;
     RepositoryClientRegistry repositoryClientRegistry;
     Path depositPath;
+    DepositDirectory depositDir;
 
     public DepositFactory(
         InfoPackageService infoPackageService,
         RepositoryService repositoryService,
         ReplicaService replicaService,
         RepositoryClientRegistry repositoryClientRegistry,
-        Path depositPath
+        DepositDirectory depositDir
     ) {
         this.infoPackageService = infoPackageService;
         this.repositoryService = repositoryService;
         this.replicaService = replicaService;
         this.repositoryClientRegistry = repositoryClientRegistry;
-        this.depositPath = depositPath;
+        this.depositDir = depositDir;
     }
 
     public Deposit create(
@@ -37,7 +38,7 @@ public class DepositFactory {
             repositoryService,
             replicaService,
             repositoryClientRegistry,
-            depositPath,
+            depositDir,
             curator,
             packageIdentifier,
             sourcePath,
