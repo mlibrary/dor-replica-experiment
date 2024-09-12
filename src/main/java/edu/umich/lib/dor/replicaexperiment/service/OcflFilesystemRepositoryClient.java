@@ -84,7 +84,7 @@ public class OcflFilesystemRepositoryClient implements RepositoryClient {
             .map(fileDetails -> fileDetails.getStorageRelativePath())
             .map(p -> Paths.get(p))
             .toList();
-        log.debug(filePaths);
+        log.debug(filePaths.toString());
         return filePaths;
     }
 
