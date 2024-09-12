@@ -1,5 +1,8 @@
 package edu.umich.lib.dor.replicaexperiment;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -10,9 +13,6 @@ import java.util.Set;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -120,7 +120,7 @@ class ReplicaExperimentApplicationTests {
         RepositoryClientRegistry registry = new RepositoryClientRegistry();
         registry.register(repoOneName, repoOneClient);
         registry.register(repoTwoName, repoTwoClient);
-        for (String repositoryName: registry.listClients()) {
+        for (String repositoryName : registry.listClients()) {
             this.repositoryService.getOrCreateRepository(repositoryName);
         }
 
@@ -158,7 +158,7 @@ class ReplicaExperimentApplicationTests {
         assertTrue(infoPackageA.hasAReplicaIn(repoOneName));
 
         List<Path> filePaths = repoOneClient.getStorageFilePaths(depositAIdentifier);
-        for (Path filePath: filePaths) {
+        for (Path filePath : filePaths) {
             Path fullPath = repoOneStoragePath.resolve(filePath);
             assertTrue(Files.exists(fullPath));
         }
@@ -184,7 +184,7 @@ class ReplicaExperimentApplicationTests {
         }
 
         List<Path> filePaths = repoTwoClient.getStorageFilePaths(depositAIdentifier);
-        for (Path filePath: filePaths) {
+        for (Path filePath : filePaths) {
             Path fullPath = repoTwoStoragePath.resolve(filePath);
             assertTrue(Files.exists(fullPath));
         }
