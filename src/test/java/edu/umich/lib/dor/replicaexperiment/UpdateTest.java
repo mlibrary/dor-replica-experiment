@@ -123,7 +123,7 @@ public class UpdateTest {
     }
 
     @Test
-    void updateFailsWhenPackageDoesNotExistHaveReplicaInRepository() {
+    void updateFailsWhenPackageDoesNotHaveReplicaInRepository() {
         when(packageServiceMock.getInfoPackage("A")).thenReturn(infoPackageMock);
         when(repositoryServiceMock.getRepository("some_repo")).thenReturn(repositoryMock);
         when(registryMock.getClient("some_repo")).thenReturn(clientMock);
