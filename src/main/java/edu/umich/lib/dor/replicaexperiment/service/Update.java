@@ -1,11 +1,11 @@
 package edu.umich.lib.dor.replicaexperiment.service;
 
-import java.util.List;
 import java.nio.file.Path;
+import java.util.List;
 
-import edu.umich.lib.dor.replicaexperiment.domain.Repository;
 import edu.umich.lib.dor.replicaexperiment.domain.Curator;
 import edu.umich.lib.dor.replicaexperiment.domain.InfoPackage;
+import edu.umich.lib.dor.replicaexperiment.domain.Repository;
 import edu.umich.lib.dor.replicaexperiment.exception.NoEntityException;
 
 public class Update implements Command {

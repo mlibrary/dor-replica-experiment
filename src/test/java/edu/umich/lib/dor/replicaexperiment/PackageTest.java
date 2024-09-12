@@ -1,12 +1,12 @@
 package edu.umich.lib.dor.replicaexperiment;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Set;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
