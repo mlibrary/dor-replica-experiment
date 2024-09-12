@@ -35,12 +35,11 @@ public class Deposit implements Command {
         String repositoryName,
         String message
     ) {
-        this.depositDir = depositDir;
-
         this.infoPackageService = infoPackageService;
         this.repositoryService = repositoryService;
         this.replicaService = replicaService;
         this.repositoryClientRegistry = repositoryClientRegistry;
+        this.depositDir = depositDir;
 
         this.curator = curator;
         this.packageIdentifier = packageIdentifier;

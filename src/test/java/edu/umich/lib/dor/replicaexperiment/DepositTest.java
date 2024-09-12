@@ -121,7 +121,7 @@ public class DepositTest {
         when(repositoryServiceMock.getRepository("some_repo")).thenReturn(repositoryMock);
         when(registryMock.getClient("some_repo")).thenReturn(clientMock);
 
-        var deposit = depositFactory.create(
+        final var deposit = depositFactory.create(
             testCurator,
             "A",
             Paths.get("something"),
