@@ -27,8 +27,9 @@ public class Package {
                 .toList();
             return paths;
         } catch (IOException e) {
-            var message = "IOException occurred: " + e.toString();
-            throw new IllegalArgumentException(message);
+            throw new RuntimeException(
+                "Could not find file paths for root path: " + fullPath, e
+            );
         }
     }
 }
