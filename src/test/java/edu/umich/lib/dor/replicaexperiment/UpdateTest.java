@@ -34,7 +34,6 @@ public class UpdateTest {
     RepositoryService repositoryServiceMock;
     ReplicaService replicaServiceMock;
     RepositoryClientRegistry registryMock;
-    Path depositPath;
 
     InfoPackage infoPackageMock;
     Repository repositoryMock;
@@ -57,7 +56,6 @@ public class UpdateTest {
         this.replicaMock = mock(Replica.class);
         this.clientMock = mock(OcflFilesystemRepositoryClient.class);
 
-        this.depositPath = Paths.get("/deposit");
         this.depositDirMock = mock(DepositDirectory.class);
         this.sourcePackageMock = mock(Package.class);
 

@@ -81,8 +81,8 @@ public class OcflFilesystemRepositoryClient implements RepositoryClient {
     public List<Path> getStorageFilePaths(String id) {
         var filePaths = getFiles(id)
             .stream()
-            .map(fileDetails -> { return fileDetails.getStorageRelativePath(); })
-            .map(p -> { return Paths.get(p); })
+            .map(fileDetails -> fileDetails.getStorageRelativePath())
+            .map(p -> Paths.get(p))
             .toList();
         log.debug(filePaths);
         return filePaths;
@@ -91,8 +91,8 @@ public class OcflFilesystemRepositoryClient implements RepositoryClient {
     public List<Path> getFilePaths(String id) {
         var filePaths = getFiles(id)
             .stream()
-            .map(fileDetails -> { return fileDetails.getPath(); })
-            .map(p -> { return Paths.get(p); })
+            .map(fileDetails -> fileDetails.getPath())
+            .map(p -> Paths.get(p))
             .toList();
         log.debug(filePaths);
         return filePaths;
@@ -116,7 +116,7 @@ public class OcflFilesystemRepositoryClient implements RepositoryClient {
             ObjectVersionId.head(objectId),
             createNewVersion(curator, message),
             updater -> {
-                for (Path inputPath: inputPaths) {
+                for (Path inputPath : inputPaths) {
                     updater.addPath(
                         updatePackagePath.resolve(inputPath),
                         inputPath.toString(),

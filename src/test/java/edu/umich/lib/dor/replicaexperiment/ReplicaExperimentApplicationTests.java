@@ -36,6 +36,7 @@ import edu.umich.lib.dor.replicaexperiment.service.DepositDirectory;
 import edu.umich.lib.dor.replicaexperiment.service.DepositFactory;
 import edu.umich.lib.dor.replicaexperiment.service.InfoPackageService;
 import edu.umich.lib.dor.replicaexperiment.service.OcflFilesystemRepositoryClient;
+import edu.umich.lib.dor.replicaexperiment.service.Package;
 import edu.umich.lib.dor.replicaexperiment.service.ReplicaService;
 import edu.umich.lib.dor.replicaexperiment.service.ReplicationFactory;
 import edu.umich.lib.dor.replicaexperiment.service.RepositoryClient;
@@ -47,8 +48,8 @@ import edu.umich.lib.dor.replicaexperiment.service.UpdateFactory;
 @Import(TestcontainersConfiguration.class)
 @DataJpaTest
 @ContextConfiguration(classes = {TestsConfig.class, TestConfiguration.class})
-@ComponentScan(basePackages={"edu.umich.lib.dor.replicaexperiment.service"}) 
-@EntityScan(basePackages={"edu.umich.lib.dor.replicaexperiment.domain"})
+@ComponentScan(basePackages = {"edu.umich.lib.dor.replicaexperiment.service"})
+@EntityScan(basePackages = {"edu.umich.lib.dor.replicaexperiment.domain"})
 @AutoConfigureTestDatabase(replace = Replace.NONE)
 class ReplicaExperimentApplicationTests {
     static final Log log = LogFactory.getLog(ReplicaExperimentApplication.class);
@@ -202,7 +203,8 @@ class ReplicaExperimentApplicationTests {
         );
         update.execute();
 
-        List<Path> updateFilePaths = depositDir.getPackage(updateAPath).getFilePaths();
+        Package updateAPackage = depositDir.getPackage(updateAPath);
+        List<Path> updateFilePaths = updateAPackage.getFilePaths();
         List<Path> packageFilePaths = repoOneClient.getFilePaths(depositAIdentifier);
         assertTrue(Set.copyOf(packageFilePaths).containsAll(Set.copyOf(updateFilePaths)));
 
@@ -213,9 +215,7 @@ class ReplicaExperimentApplicationTests {
         }
 
         for (Path updateFilePath : updateFilePaths) {
-            Path fullUpdateFilePath = depositDir.getDepositPath()
-                .resolve(updateAPath)
-                .resolve(updateFilePath);
+            Path fullUpdateFilePath = updateAPackage.getRootPath().resolve(updateFilePath);
             String updateFileChecksum = ChecksumCalculator.calculate(fullUpdateFilePath);
             Optional<Path> maybeStoragePath = storageFilePaths.stream()
                 .filter(p -> p.endsWith(updateFilePath))
