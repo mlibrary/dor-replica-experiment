@@ -35,14 +35,14 @@ public class DepositTest {
     RepositoryClientRegistry registryMock;
     Path depositPath;
     DepositDirectory depositDirMock;
-    Package packageMock;
-
-    DepositFactory depositFactory;
 
     InfoPackage infoPackageMock;
     Repository repositoryMock;
-    OcflFilesystemRepositoryClient clientMock;
     Replica replicaMock;
+    OcflFilesystemRepositoryClient clientMock;
+    Package sourcePackageMock;
+
+    DepositFactory depositFactory;
 
     @BeforeEach
     void init() {
@@ -51,7 +51,7 @@ public class DepositTest {
         this.replicaServiceMock = mock(ReplicaService.class);
         this.registryMock = mock(RepositoryClientRegistry.class);
         this.depositDirMock = mock(DepositDirectory.class);
-        this.packageMock = mock(Package.class);
+        this.sourcePackageMock = mock(Package.class);
 
         depositFactory = new DepositFactory(
             packageServiceMock,
@@ -72,7 +72,8 @@ public class DepositTest {
         when(packageServiceMock.getInfoPackage("A")).thenReturn(null);
         when(repositoryServiceMock.getRepository("some_repo")).thenReturn(repositoryMock);
         when(registryMock.getClient("some_repo")).thenReturn(clientMock);
-    
+        when(depositDirMock.getPackage(Paths.get("something"))).thenReturn(sourcePackageMock);
+
         assertDoesNotThrow(() -> {
             depositFactory.create(
                 testCurator,
@@ -120,6 +121,7 @@ public class DepositTest {
         when(packageServiceMock.getInfoPackage("A")).thenReturn(null);
         when(repositoryServiceMock.getRepository("some_repo")).thenReturn(repositoryMock);
         when(registryMock.getClient("some_repo")).thenReturn(clientMock);
+        when(depositDirMock.getPackage(Paths.get("something"))).thenReturn(sourcePackageMock);
 
         final var deposit = depositFactory.create(
             testCurator,
@@ -129,8 +131,10 @@ public class DepositTest {
             "we're good"
         );
 
-        when(depositDirMock.getPackage(Paths.get("something"))).thenReturn(packageMock);
-        when(packageMock.getRootPath()).thenReturn(Paths.get("deposit/something"));
+        verify(sourcePackageMock).validatePath();
+
+        when(depositDirMock.getPackage(Paths.get("something"))).thenReturn(sourcePackageMock);
+        when(sourcePackageMock.getRootPath()).thenReturn(Paths.get("deposit/something"));
         when(packageServiceMock.createInfoPackage("A")).thenReturn(infoPackageMock);
         when(replicaServiceMock.createReplica(infoPackageMock, repositoryMock))
             .thenReturn(replicaMock);
