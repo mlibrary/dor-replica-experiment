@@ -30,12 +30,14 @@ import edu.umich.lib.dor.replicaexperiment.service.RepositoryService;
 
 public class DepositTest {
     Curator testCurator = new Curator("test", "test@example.edu");
+
     InfoPackageService packageServiceMock;
     RepositoryService repositoryServiceMock;
     ReplicaService replicaServiceMock;
     RepositoryClientRegistry registryMock;
-    Path depositPath;
     DepositDirectory depositDirMock;
+
+    DepositFactory depositFactory;
 
     InfoPackage infoPackageMock;
     Repository repositoryMock;
@@ -43,7 +45,6 @@ public class DepositTest {
     OcflFilesystemRepositoryClient clientMock;
     Package sourcePackageMock;
 
-    DepositFactory depositFactory;
 
     @BeforeEach
     void init() {
@@ -52,9 +53,8 @@ public class DepositTest {
         this.replicaServiceMock = mock(ReplicaService.class);
         this.registryMock = mock(RepositoryClientRegistry.class);
         this.depositDirMock = mock(DepositDirectory.class);
-        this.sourcePackageMock = mock(Package.class);
 
-        depositFactory = new DepositFactory(
+        this.depositFactory = new DepositFactory(
             packageServiceMock,
             repositoryServiceMock,
             replicaServiceMock,
@@ -64,8 +64,9 @@ public class DepositTest {
 
         this.infoPackageMock = mock(InfoPackage.class);
         this.repositoryMock = mock(Repository.class);
-        this.clientMock = mock(OcflFilesystemRepositoryClient.class);
         this.replicaMock = mock(Replica.class);
+        this.clientMock = mock(OcflFilesystemRepositoryClient.class);
+        this.sourcePackageMock = mock(Package.class);
     }
 
     @Test

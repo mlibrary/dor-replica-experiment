@@ -34,15 +34,16 @@ public class UpdateTest {
     RepositoryService repositoryServiceMock;
     ReplicaService replicaServiceMock;
     RepositoryClientRegistry registryMock;
+    DepositDirectory depositDirMock;
+
+    UpdateFactory updateFactory;
 
     InfoPackage infoPackageMock;
     Repository repositoryMock;
     Replica replicaMock;
     OcflFilesystemRepositoryClient clientMock;
-    DepositDirectory depositDirMock;
     Package sourcePackageMock;
 
-    UpdateFactory updateFactory;
 
     @BeforeEach
     void init() {
@@ -50,14 +51,7 @@ public class UpdateTest {
         this.repositoryServiceMock = mock(RepositoryService.class);
         this.replicaServiceMock = mock(ReplicaService.class);
         this.registryMock = mock(RepositoryClientRegistry.class);
-        
-        this.infoPackageMock = mock(InfoPackage.class);
-        this.repositoryMock = mock(Repository.class);
-        this.replicaMock = mock(Replica.class);
-        this.clientMock = mock(OcflFilesystemRepositoryClient.class);
-
         this.depositDirMock = mock(DepositDirectory.class);
-        this.sourcePackageMock = mock(Package.class);
 
         this.updateFactory = new UpdateFactory(
             packageServiceMock,
@@ -66,6 +60,12 @@ public class UpdateTest {
             registryMock,
             depositDirMock
         );
+
+        this.infoPackageMock = mock(InfoPackage.class);
+        this.repositoryMock = mock(Repository.class);
+        this.replicaMock = mock(Replica.class);
+        this.clientMock = mock(OcflFilesystemRepositoryClient.class);
+        this.sourcePackageMock = mock(Package.class);
     }
 
     @Test
