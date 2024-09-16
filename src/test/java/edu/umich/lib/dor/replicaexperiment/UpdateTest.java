@@ -1,13 +1,13 @@
 package edu.umich.lib.dor.replicaexperiment;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.List;
-
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -152,19 +152,20 @@ public class UpdateTest {
         );
 
         when(depositDirMock.getPackage(Paths.get("update_A"))).thenReturn(sourcePackageMock);
-        when(sourcePackageMock.getRootPath()).thenReturn(Paths.get("some/path/update_A"));
-        when(sourcePackageMock.getFilePaths()).thenReturn(newPackagePaths);
 
-        Update update = updateFactory.create(
+        final Update update = updateFactory.create(
             testCurator,
             "A",
             Paths.get("update_A"),
             "some_repo",
             "we're good"
         );
+        verify(sourcePackageMock).validatePath();
+
+        when(sourcePackageMock.getRootPath()).thenReturn(Paths.get("some/path/update_A"));
+        when(sourcePackageMock.getFilePaths()).thenReturn(newPackagePaths);
 
         update.execute();
-
         verify(clientMock).updateObjectFiles(
             "A",
             sourcePackageMock,
