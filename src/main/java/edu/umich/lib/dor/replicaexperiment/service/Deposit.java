@@ -22,6 +22,7 @@ public class Deposit implements Command {
 
     Repository repository;
     RepositoryClient repositoryClient;
+    Package sourcePackage;
 
     public Deposit(
         InfoPackageService infoPackageService,
@@ -68,10 +69,11 @@ public class Deposit implements Command {
         }
 
         this.repositoryClient = repositoryClientRegistry.getClient(repositoryName);
+        this.sourcePackage = depositDir.getPackage(sourcePath);
+        this.sourcePackage.validatePath();
     }
 
     public void execute() {
-        Package sourcePackage = depositDir.getPackage(sourcePath);
         repositoryClient.createObject(
             packageIdentifier, sourcePackage.getRootPath(), curator, message
         );

@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import edu.umich.lib.dor.replicaexperiment.exception.NoContentException;
 import edu.umich.lib.dor.replicaexperiment.service.DepositDirectory;
 import edu.umich.lib.dor.replicaexperiment.service.Package;
 
@@ -42,6 +43,27 @@ public class PackageTest {
             Paths.get("deposit_one")
         );
         assertEquals(testDepositPath.resolve("deposit_one"), pkg.getRootPath());
+    }
+
+
+    @Test
+    public void existingPackagePassesValidation() {
+        assertDoesNotThrow(() -> {
+            new Package(
+                new DepositDirectory(testDepositPath),
+                Paths.get("deposit_one")
+            ).validatePath();
+        });
+    }
+
+    @Test
+    public void nonexistentPackageFailsValidation() {
+        assertThrows(NoContentException.class, () -> {
+            new Package(
+                new DepositDirectory(testDepositPath),
+                Paths.get("no_such_deposit")
+            ).validatePath();
+        });
     }
 
     @Test

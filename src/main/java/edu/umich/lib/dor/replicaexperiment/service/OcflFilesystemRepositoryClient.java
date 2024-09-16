@@ -1,13 +1,10 @@
 package edu.umich.lib.dor.replicaexperiment.service;
 
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.List;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import io.ocfl.api.OcflOption;
 import io.ocfl.api.OcflRepository;
 import io.ocfl.api.model.FileDetails;
@@ -16,9 +13,10 @@ import io.ocfl.api.model.ObjectVersionId;
 import io.ocfl.api.model.VersionInfo;
 import io.ocfl.core.OcflRepositoryBuilder;
 import io.ocfl.core.extension.storage.layout.config.HashedNTupleLayoutConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import edu.umich.lib.dor.replicaexperiment.domain.Curator;
-import edu.umich.lib.dor.replicaexperiment.exception.NoContentException;
 
 public class OcflFilesystemRepositoryClient implements RepositoryClient {
 	private static final Logger log = LoggerFactory.getLogger(OcflFilesystemRepositoryClient.class);
@@ -34,20 +32,17 @@ public class OcflFilesystemRepositoryClient implements RepositoryClient {
             .build();
     }
 
+    public OcflFilesystemRepositoryClient(OcflRepository repository) {
+        this.repo = repository;
+    }
+
     private VersionInfo createNewVersion(Curator curator, String message) {
         return new VersionInfo().setUser(curator.username(), curator.email()).setMessage(message);
     }
 
-    private void validatePath(Path path) {
-        if (!Files.exists(path)) {
-            throw new NoContentException(
-                String.format("No content exists at path %s.", path.toString())
-            );
-        }
-    }
-
-    public RepositoryClient createObject(String id, Path inputPath, Curator curator, String message) {
-        validatePath(inputPath);
+    public RepositoryClient createObject(
+        String id, Path inputPath, Curator curator, String message
+    ) {
         repo.putObject(
             ObjectVersionId.head(id),
             inputPath,
@@ -130,7 +125,6 @@ public class OcflFilesystemRepositoryClient implements RepositoryClient {
 
     public RepositoryClient importObject(Path inputPath) {
         // TO DO: Is MOVE_SOURCE OK? Keeps staging clear
-        validatePath(inputPath);
         repo.importObject(inputPath, OcflOption.MOVE_SOURCE);
         return this;
     }

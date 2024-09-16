@@ -86,6 +86,7 @@ public class UpdateTest {
                 "we're good"
             );
         });
+        verify(sourcePackageMock).validatePath();
     }
 
     @Test
