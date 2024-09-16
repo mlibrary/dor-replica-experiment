@@ -22,15 +22,18 @@ import org.mockito.ArgumentMatchers;
 
 import edu.umich.lib.dor.replicaexperiment.domain.Curator;
 import edu.umich.lib.dor.replicaexperiment.service.OcflFilesystemRepositoryClient;
+import edu.umich.lib.dor.replicaexperiment.service.Package;
 import edu.umich.lib.dor.replicaexperiment.service.RepositoryClient;
 
 public class OcflFilesystemRepositoryClientTest {
     OcflRepository ocflRepositoryMock;
     OcflFilesystemRepositoryClient repositoryClient;
+    Package sourcePackageMock;
 
     @BeforeEach
     public void init() {
         ocflRepositoryMock = mock(OcflRepository.class);
+        sourcePackageMock = mock(Package.class);
     }
 
     @Test
@@ -40,10 +43,12 @@ public class OcflFilesystemRepositoryClientTest {
 
     @Test
     public void clientCreatesObject() {
+        when(sourcePackageMock.getRootPath()).thenReturn(Paths.get("some/path/deposit_A"));
+
         RepositoryClient repositoryClient = new OcflFilesystemRepositoryClient(ocflRepositoryMock);
         repositoryClient.createObject(
             "A",
-            Paths.get("some/path/deposit_A"),
+            sourcePackageMock,
             new Curator("test", "test@example.edu"),
             "adding images and metadata"
         );
@@ -61,6 +66,11 @@ public class OcflFilesystemRepositoryClientTest {
     public void clientUpdatesObject() {
         RepositoryClient repositoryClient = new OcflFilesystemRepositoryClient(ocflRepositoryMock);
         
+        when(sourcePackageMock.getRootPath()).thenReturn(Paths.get("some/path/update_A"));
+        when(sourcePackageMock.getFilePaths()).thenReturn(List.of(
+            Paths.get("A.txt"), Paths.get("B/C.txt")
+        ));
+
         when(ocflRepositoryMock.updateObject(
             any(ObjectVersionId.class),
             any(VersionInfo.class),
@@ -94,10 +104,10 @@ public class OcflFilesystemRepositoryClientTest {
                 );
                 return versionId;
             });
+
         repositoryClient.updateObjectFiles(
             "A",
-            Paths.get("some/path/update_A"),
-            List.of(Paths.get("A.txt"), Paths.get("B/C.txt")),
+            sourcePackageMock,
             new Curator("test", "test@example.edu"),
             "Updating files"
         );

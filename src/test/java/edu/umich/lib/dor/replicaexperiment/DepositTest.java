@@ -142,7 +142,7 @@ public class DepositTest {
         deposit.execute();
 
         verify(clientMock).createObject(
-            "A", Paths.get("deposit/something"), testCurator, "we're good"
+            "A", sourcePackageMock, testCurator, "we're good"
         );
         verify(packageServiceMock).createInfoPackage("A");
         verify(replicaServiceMock).createReplica(infoPackageMock, repositoryMock);
