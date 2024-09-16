@@ -6,7 +6,7 @@ import java.util.List;
 import edu.umich.lib.dor.replicaexperiment.domain.Curator;
 
 public interface RepositoryClient {
-    RepositoryClient createObject(String id, Package sourcPackage, Curator curator, String message);
+    RepositoryClient createObject(String id, Package sourcePackage, Curator curator, String message);
 
     RepositoryClient readObject(String id, Path outputPath);
 

@@ -1,13 +1,13 @@
 package edu.umich.lib.dor.replicaexperiment;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
-
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,6 +18,7 @@ import edu.umich.lib.dor.replicaexperiment.domain.Replica;
 import edu.umich.lib.dor.replicaexperiment.domain.Repository;
 import edu.umich.lib.dor.replicaexperiment.exception.EntityAlreadyExistsException;
 import edu.umich.lib.dor.replicaexperiment.exception.NoEntityException;
+import edu.umich.lib.dor.replicaexperiment.service.Deposit;
 import edu.umich.lib.dor.replicaexperiment.service.DepositDirectory;
 import edu.umich.lib.dor.replicaexperiment.service.DepositFactory;
 import edu.umich.lib.dor.replicaexperiment.service.InfoPackageService;
@@ -83,6 +84,7 @@ public class DepositTest {
                 "we're good"
             );
         });
+        verify(sourcePackageMock).validatePath();
     }
 
     @Test
@@ -123,24 +125,21 @@ public class DepositTest {
         when(registryMock.getClient("some_repo")).thenReturn(clientMock);
         when(depositDirMock.getPackage(Paths.get("something"))).thenReturn(sourcePackageMock);
 
-        final var deposit = depositFactory.create(
+        final Deposit deposit = depositFactory.create(
             testCurator,
             "A",
             Paths.get("something"),
             "some_repo",
             "we're good"
         );
-
         verify(sourcePackageMock).validatePath();
 
-        when(depositDirMock.getPackage(Paths.get("something"))).thenReturn(sourcePackageMock);
         when(sourcePackageMock.getRootPath()).thenReturn(Paths.get("deposit/something"));
         when(packageServiceMock.createInfoPackage("A")).thenReturn(infoPackageMock);
         when(replicaServiceMock.createReplica(infoPackageMock, repositoryMock))
             .thenReturn(replicaMock);
 
         deposit.execute();
-
         verify(clientMock).createObject(
             "A", sourcePackageMock, testCurator, "we're good"
         );
