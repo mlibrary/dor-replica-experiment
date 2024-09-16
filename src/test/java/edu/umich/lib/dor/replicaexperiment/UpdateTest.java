@@ -167,8 +167,7 @@ public class UpdateTest {
 
         verify(clientMock).updateObjectFiles(
             "A",
-            Paths.get("some/path/update_A"),
-            newPackagePaths,
+            sourcePackageMock,
             testCurator,
             "we're good"
         );

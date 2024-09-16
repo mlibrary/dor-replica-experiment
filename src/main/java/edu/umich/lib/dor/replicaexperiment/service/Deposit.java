@@ -75,7 +75,7 @@ public class Deposit implements Command {
 
     public void execute() {
         repositoryClient.createObject(
-            packageIdentifier, sourcePackage.getRootPath(), curator, message
+            packageIdentifier, sourcePackage, curator, message
         );
 
         var infoPackage = infoPackageService.createInfoPackage(packageIdentifier);

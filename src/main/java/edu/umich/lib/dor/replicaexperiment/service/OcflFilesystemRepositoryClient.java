@@ -41,11 +41,11 @@ public class OcflFilesystemRepositoryClient implements RepositoryClient {
     }
 
     public RepositoryClient createObject(
-        String id, Path inputPath, Curator curator, String message
+        String id, Package sourcePackage, Curator curator, String message
     ) {
         repo.putObject(
             ObjectVersionId.head(id),
-            inputPath,
+            sourcePackage.getRootPath(),
             createNewVersion(curator, message)
         );
         return this;
@@ -105,15 +105,16 @@ public class OcflFilesystemRepositoryClient implements RepositoryClient {
     }
 
     public RepositoryClient updateObjectFiles(
-        String objectId, Path updatePackagePath, List<Path> inputPaths, Curator curator, String message
+        String objectId, Package sourcePackage, Curator curator, String message
     ) {
+        Path rootPackagePath = sourcePackage.getRootPath();
         repo.updateObject(
             ObjectVersionId.head(objectId),
             createNewVersion(curator, message),
             updater -> {
-                for (Path inputPath : inputPaths) {
+                for (Path inputPath : sourcePackage.getFilePaths()) {
                     updater.addPath(
-                        updatePackagePath.resolve(inputPath),
+                        rootPackagePath.resolve(inputPath),
                         inputPath.toString(),
                         OcflOption.OVERWRITE
                     );

@@ -87,8 +87,7 @@ public class Update implements Command {
     public void execute() {
         repositoryClient.updateObjectFiles(
             packageIdentifier,
-            sourcePackage.getRootPath(),
-            sourcePackage.getFilePaths(),
+            sourcePackage,
             curator,
             message
         );
