@@ -1,13 +1,26 @@
 services:
-  mysql:
+  database:
     image: 'mysql:latest'
     environment:
-      - 'MYSQL_DATABASE=mydatabase'
+      - 'MYSQL_DATABASE=replica_experiment'
       - 'MYSQL_PASSWORD=secret'
       - 'MYSQL_ROOT_PASSWORD=verysecret'
-      - 'MYSQL_USER=myuser'
+      - 'MYSQL_USER=experiment_user'
     ports:
       - '3306'
     command: ['--character-set-server=utf8mb4', '--collation-server=utf8mb4_unicode_ci']
+    entrypoint: ['docker-entrypoint.sh']
     volumes:
       - ./.data/mysql:/var/lib/mysql:delegated
+      - ./mysql:/docker-entrypoint-initdb.d:ro
+  app:
+    build:
+      dockerfile: ./Dockerfile
+      target: base
+    depends_on:
+      - database
+    command: tail -f /dev/null
+    volumes:
+      - ./repos:/app/repos/
+    ports:
+      - '8080:8080'
