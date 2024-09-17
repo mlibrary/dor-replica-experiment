@@ -40,6 +40,7 @@ public class OcflFilesystemRepositoryClientTest {
     public void init() {
         ocflRepositoryMock = mock(OcflRepository.class);
         sourcePackageMock = mock(Package.class);
+        repositoryClient = new OcflFilesystemRepositoryClient(ocflRepositoryMock);
     }
 
     public ObjectDetails createObjectDetails() {
@@ -72,7 +73,6 @@ public class OcflFilesystemRepositoryClientTest {
     public void clientCreatesObject() {
         when(sourcePackageMock.getRootPath()).thenReturn(Paths.get("some/path/deposit_A"));
 
-        RepositoryClient repositoryClient = new OcflFilesystemRepositoryClient(ocflRepositoryMock);
         repositoryClient.createObject(
             "A",
             sourcePackageMock,
@@ -91,10 +91,6 @@ public class OcflFilesystemRepositoryClientTest {
 
     @Test
     public void clientUpdatesObject() {
-        final RepositoryClient repositoryClient = new OcflFilesystemRepositoryClient(
-            ocflRepositoryMock
-        );
-        
         when(sourcePackageMock.getRootPath()).thenReturn(Paths.get("some/path/update_A"));
         when(sourcePackageMock.getFilePaths()).thenReturn(List.of(
             Paths.get("A.txt"), Paths.get("B/C.txt")
@@ -144,7 +140,6 @@ public class OcflFilesystemRepositoryClientTest {
 
     @Test
     public void clientGetsPackagePaths() {
-        RepositoryClient repositoryClient = new OcflFilesystemRepositoryClient(ocflRepositoryMock);
         when(ocflRepositoryMock.describeObject("A"))
             .thenReturn(createObjectDetails());
         var filePaths = repositoryClient.getFilePaths("A");
@@ -153,7 +148,6 @@ public class OcflFilesystemRepositoryClientTest {
 
     @Test
     public void clientGetsStoragePackagePaths() {
-        RepositoryClient repositoryClient = new OcflFilesystemRepositoryClient(ocflRepositoryMock);
         when(ocflRepositoryMock.describeObject("A"))
             .thenReturn(createObjectDetails());
         var filePaths = repositoryClient.getStorageFilePaths("A");
@@ -162,14 +156,12 @@ public class OcflFilesystemRepositoryClientTest {
 
     @Test
     public void clientExportsObject() {
-        RepositoryClient repositoryClient = new OcflFilesystemRepositoryClient(ocflRepositoryMock);
         repositoryClient.exportObject("A", Paths.get("some/path/staging/A"));
         verify(ocflRepositoryMock).exportObject("A", Paths.get("some/path/staging/A"));
     }
 
     @Test
     public void clientImportsObject() {
-        RepositoryClient repositoryClient = new OcflFilesystemRepositoryClient(ocflRepositoryMock);
         repositoryClient.importObject(Paths.get("some/path/staging/A"));
         verify(ocflRepositoryMock).importObject(
             Paths.get("some/path/staging/A"), OcflOption.MOVE_SOURCE
