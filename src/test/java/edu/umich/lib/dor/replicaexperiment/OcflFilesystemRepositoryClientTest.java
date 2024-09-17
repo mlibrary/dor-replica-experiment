@@ -1,21 +1,27 @@
 package edu.umich.lib.dor.replicaexperiment;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.List;
 import java.util.function.Consumer;
 
 import io.ocfl.api.OcflObjectUpdater;
 import io.ocfl.api.OcflOption;
 import io.ocfl.api.OcflRepository;
+import io.ocfl.api.model.FileDetails;
+import io.ocfl.api.model.ObjectDetails;
 import io.ocfl.api.model.ObjectVersionId;
 import io.ocfl.api.model.User;
+import io.ocfl.api.model.VersionDetails;
 import io.ocfl.api.model.VersionInfo;
+import io.ocfl.api.model.VersionNum;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
@@ -34,6 +40,27 @@ public class OcflFilesystemRepositoryClientTest {
     public void init() {
         ocflRepositoryMock = mock(OcflRepository.class);
         sourcePackageMock = mock(Package.class);
+    }
+
+    public ObjectDetails createObjectDetails() {
+        var fileaDetails = new FileDetails();
+        fileaDetails.setPath("test.txt");
+        fileaDetails.setStorageRelativePath("storage/A/test.txt");
+
+        var fileMap = new HashMap<String, FileDetails>();
+        fileMap.put("A", fileaDetails);
+        var versionDetails = new VersionDetails();
+        versionDetails.setFileMap(fileMap);
+
+        var versionMap = new HashMap<VersionNum, VersionDetails>();
+        var versionNum = new VersionNum(1);
+        versionMap.put(versionNum, versionDetails);
+
+        var details = new ObjectDetails();
+        details.setId("A");
+        details.setHeadVersionNum(versionNum);
+        details.setVersions(versionMap);
+        return details;
     }
 
     @Test
@@ -64,7 +91,9 @@ public class OcflFilesystemRepositoryClientTest {
 
     @Test
     public void clientUpdatesObject() {
-        RepositoryClient repositoryClient = new OcflFilesystemRepositoryClient(ocflRepositoryMock);
+        final RepositoryClient repositoryClient = new OcflFilesystemRepositoryClient(
+            ocflRepositoryMock
+        );
         
         when(sourcePackageMock.getRootPath()).thenReturn(Paths.get("some/path/update_A"));
         when(sourcePackageMock.getFilePaths()).thenReturn(List.of(
@@ -110,6 +139,40 @@ public class OcflFilesystemRepositoryClientTest {
             sourcePackageMock,
             new Curator("test", "test@example.edu"),
             "Updating files"
+        );
+    }
+
+    @Test
+    public void clientGetsPackagePaths() {
+        RepositoryClient repositoryClient = new OcflFilesystemRepositoryClient(ocflRepositoryMock);
+        when(ocflRepositoryMock.describeObject("A"))
+            .thenReturn(createObjectDetails());
+        var filePaths = repositoryClient.getFilePaths("A");
+        assertIterableEquals(List.of(Paths.get("test.txt")), filePaths);
+    }
+
+    @Test
+    public void clientGetsStoragePackagePaths() {
+        RepositoryClient repositoryClient = new OcflFilesystemRepositoryClient(ocflRepositoryMock);
+        when(ocflRepositoryMock.describeObject("A"))
+            .thenReturn(createObjectDetails());
+        var filePaths = repositoryClient.getStorageFilePaths("A");
+        assertIterableEquals(List.of(Paths.get("/storage/A/test.txt")), filePaths);
+    }
+
+    @Test
+    public void clientExportsObject() {
+        RepositoryClient repositoryClient = new OcflFilesystemRepositoryClient(ocflRepositoryMock);
+        repositoryClient.exportObject("A", Paths.get("some/path/staging/A"));
+        verify(ocflRepositoryMock).exportObject("A", Paths.get("some/path/staging/A"));
+    }
+
+    @Test
+    public void clientImportsObject() {
+        RepositoryClient repositoryClient = new OcflFilesystemRepositoryClient(ocflRepositoryMock);
+        repositoryClient.importObject(Paths.get("some/path/staging/A"));
+        verify(ocflRepositoryMock).importObject(
+            Paths.get("some/path/staging/A"), OcflOption.MOVE_SOURCE
         );
     }
 }
