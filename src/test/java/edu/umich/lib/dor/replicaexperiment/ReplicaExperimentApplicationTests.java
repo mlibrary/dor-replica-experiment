@@ -22,7 +22,6 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.util.FileSystemUtils;
 
@@ -45,7 +44,6 @@ import edu.umich.lib.dor.replicaexperiment.service.RepositoryService;
 import edu.umich.lib.dor.replicaexperiment.service.Update;
 import edu.umich.lib.dor.replicaexperiment.service.UpdateFactory;
 
-@Import(TestcontainersConfiguration.class)
 @DataJpaTest
 @ContextConfiguration(classes = {TestsConfig.class, TestConfiguration.class})
 @ComponentScan(basePackages = {"edu.umich.lib.dor.replicaexperiment.service"})
