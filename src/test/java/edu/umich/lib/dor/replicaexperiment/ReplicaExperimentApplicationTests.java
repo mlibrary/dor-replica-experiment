@@ -22,6 +22,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.util.FileSystemUtils;
 
@@ -49,6 +50,7 @@ import edu.umich.lib.dor.replicaexperiment.service.UpdateFactory;
 @ComponentScan(basePackages = {"edu.umich.lib.dor.replicaexperiment.service"})
 @EntityScan(basePackages = {"edu.umich.lib.dor.replicaexperiment.domain"})
 @AutoConfigureTestDatabase(replace = Replace.NONE)
+@ActiveProfiles("test")
 class ReplicaExperimentApplicationTests {
     static final Logger log = LoggerFactory.getLogger(ReplicaExperimentApplication.class);
 

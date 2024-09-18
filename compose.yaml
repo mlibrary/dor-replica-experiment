@@ -22,7 +22,7 @@ services:
     command: tail -f /dev/null
     volumes:
       - ./src:/app/src
-      - ./repos:/app/repos/
-      - /build
+      - ./repos:/app/repos
+      - ./build:/app/build
     ports:
       - '8080:8080'
