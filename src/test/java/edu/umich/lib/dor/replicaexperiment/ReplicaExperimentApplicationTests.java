@@ -92,25 +92,20 @@ class ReplicaExperimentApplicationTests {
     RepositoryClient repoOneClient;
     RepositoryClient repoTwoClient;
 
-    void resetDirPath(Path path) {
+    void resetDirPath(Path path) throws IOException {
         if (Files.exists(path)) {
-            try {
-                FileSystemUtils.deleteRecursively(path);
-            } catch (IOException e) {
-                log.error(e.getMessage());
-            }
+            FileSystemUtils.deleteRecursively(path);
         }
-        try {
-            Files.createDirectories(path);
-        } catch (IOException e) {
-            log.error(e.getMessage());
-        }
+        Files.createDirectories(path);
     }
 
     @BeforeEach
-    void init() {
+    void init() throws IOException {
         resetDirPath(repoOneStoragePath);
+        resetDirPath(repoOneWorkspacePath);
         resetDirPath(repoTwoStoragePath);
+        resetDirPath(repoTwoWorkspacePath);
+
         this.repoOneClient = new OcflFilesystemRepositoryClient(
             repoOneStoragePath, repoOneWorkspacePath
         );
