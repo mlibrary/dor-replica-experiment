@@ -19,7 +19,7 @@ services:
       target: base
     depends_on:
       - database
-    command: tail -f /dev/null
+    command: gradle bootRun
     volumes:
       - ./src:/app/src
       - ./repos:/app/repos
