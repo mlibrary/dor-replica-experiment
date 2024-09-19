@@ -26,3 +26,16 @@ services:
       - ./build:/app/build
     ports:
       - '8080:8080'
+  deployment:
+    build:
+      dockerfile: ./Dockerfile
+      target: deployment
+      args:
+        - JAR_NAME_ARG=replicaexperiment-0.0.1-SNAPSHOT.jar
+    # command: tail -f /dev/null
+    depends_on:
+      - database
+    volumes:
+      - ./repos:/app/repos
+    ports:
+      - '8080:8080'
