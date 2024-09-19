@@ -25,8 +25,6 @@ ARG JAR_NAME_ARG
 
 ENV JAR_NAME=${JAR_NAME_ARG}
 
-RUN echo $JAR_NAME
-
 WORKDIR /app/
 
 COPY --from=build /app/build/libs/${JAR_NAME_ARG} .
