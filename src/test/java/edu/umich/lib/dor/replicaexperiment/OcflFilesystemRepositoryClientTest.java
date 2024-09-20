@@ -48,6 +48,7 @@ public class OcflFilesystemRepositoryClientTest {
         fileaDetails.setPath("test.txt");
         fileaDetails.setStorageRelativePath("storage/A/test.txt");
 
+        
         var fileMap = new HashMap<String, FileDetails>();
         fileMap.put("A", fileaDetails);
         var versionDetails = new VersionDetails();
