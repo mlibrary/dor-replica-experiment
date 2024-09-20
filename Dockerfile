@@ -4,7 +4,7 @@ WORKDIR /app/
 
 ENV GRADLE_USER_HOME /gradle_user_home/
 
-COPY build.gradle settings.gradle gradle.properties .
+COPY build.gradle settings.gradle gradle.properties ./
 COPY src/ ./src/
 
 EXPOSE 8080
@@ -15,7 +15,7 @@ FROM gradle:8.10-jdk21-jammy as build
 
 WORKDIR /app/
 
-COPY --from=base /app .
+COPY --from=base /app ./
 
 RUN gradle bootJar
 
@@ -27,7 +27,7 @@ ENV JAR_NAME=${JAR_NAME_ARG}
 
 WORKDIR /app/
 
-COPY --from=build /app/build/libs/${JAR_NAME_ARG} .
+COPY --from=build /app/build/libs/${JAR_NAME_ARG} ./
 
 EXPOSE 8080
 
