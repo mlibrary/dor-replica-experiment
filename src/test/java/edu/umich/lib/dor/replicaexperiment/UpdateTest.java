@@ -162,9 +162,6 @@ public class UpdateTest {
         );
         verify(sourcePackageMock).validatePath();
 
-        when(sourcePackageMock.getRootPath()).thenReturn(Paths.get("some/path/update_A"));
-        when(sourcePackageMock.getFilePaths()).thenReturn(newPackagePaths);
-
         update.execute();
         verify(clientMock).updateObjectFiles(
             "A",

@@ -6,7 +6,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -135,10 +134,7 @@ public class DepositTest {
         );
         verify(sourcePackageMock).validatePath();
 
-        when(sourcePackageMock.getRootPath()).thenReturn(Paths.get("deposit/something"));
         when(packageServiceMock.createInfoPackage("A")).thenReturn(infoPackageMock);
-        when(replicaServiceMock.createReplica(infoPackageMock, repositoryMock))
-            .thenReturn(replicaMock);
 
         deposit.execute();
         verify(clientMock).createObject(
