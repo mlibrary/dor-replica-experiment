@@ -1,7 +1,6 @@
 package edu.umich.lib.dor.replicaexperiment;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -37,6 +36,8 @@ import edu.umich.lib.dor.replicaexperiment.service.DepositFactory;
 import edu.umich.lib.dor.replicaexperiment.service.InfoPackageService;
 import edu.umich.lib.dor.replicaexperiment.service.OcflFilesystemRepositoryClient;
 import edu.umich.lib.dor.replicaexperiment.service.Package;
+import edu.umich.lib.dor.replicaexperiment.service.Purge;
+import edu.umich.lib.dor.replicaexperiment.service.PurgeFactory;
 import edu.umich.lib.dor.replicaexperiment.service.ReplicaService;
 import edu.umich.lib.dor.replicaexperiment.service.ReplicationFactory;
 import edu.umich.lib.dor.replicaexperiment.service.RepositoryClient;
@@ -88,6 +89,7 @@ class ReplicaExperimentApplicationTests {
     DepositFactory depositFactory;
     ReplicationFactory replicationFactory;
     UpdateFactory updateFactory;
+    PurgeFactory purgeFactory;
 
     RepositoryClient repoOneClient;
     RepositoryClient repoTwoClient;
@@ -129,6 +131,10 @@ class ReplicaExperimentApplicationTests {
         this.updateFactory = new UpdateFactory(
             infoPackageService, repositoryService, replicaService, registry, depositDir
         );
+        this.purgeFactory = new PurgeFactory(
+            infoPackageService, repositoryService, replicaService, registry
+        );
+
     }
 
     @Test
@@ -222,5 +228,30 @@ class ReplicaExperimentApplicationTests {
                 assertEquals(updateFileChecksum, storageFileChecksum);
             }
         }
+    }
+
+    @Test
+    void purgeRemovesPackageFromRepository() {
+        Deposit deposit = depositFactory.create(
+            testCurator, depositAIdentifier, depositAPath, repoOneName, "first version!!!"
+        );
+        deposit.execute();
+
+        List<Path> filePaths = repoOneClient.getStorageFilePaths(depositAIdentifier);
+        final InfoPackage infoPackage = infoPackageService.getInfoPackage(depositAIdentifier);
+        final Repository repository = repositoryService.getRepository(repoOneName);
+
+        Purge purge = purgeFactory.create(depositAIdentifier, repoOneName);
+        purge.execute();
+
+        assertFalse(repoOneClient.hasObject(depositAIdentifier));
+
+        for (Path filePath : filePaths) {
+            Path fullPath = repoOneStoragePath.resolve(filePath);
+            assertFalse(Files.exists(fullPath));
+        }
+
+        assertNull(replicaService.getReplica(infoPackage, repository));
+        assertNotNull(repositoryService.getRepository(repoOneName));
     }
 }

@@ -164,4 +164,10 @@ public class OcflFilesystemRepositoryClientTest {
             Paths.get("some/path/staging/A"), OcflOption.MOVE_SOURCE
         );
     }
+
+    @Test
+    public void clientPurgesObject() {
+        repositoryClient.purgeObject("A");
+        verify(ocflRepositoryMock).purgeObject("A");
+    }
 }
