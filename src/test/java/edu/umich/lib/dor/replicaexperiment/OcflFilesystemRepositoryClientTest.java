@@ -29,7 +29,6 @@ import org.mockito.ArgumentMatchers;
 import edu.umich.lib.dor.replicaexperiment.domain.Curator;
 import edu.umich.lib.dor.replicaexperiment.service.OcflFilesystemRepositoryClient;
 import edu.umich.lib.dor.replicaexperiment.service.Package;
-import edu.umich.lib.dor.replicaexperiment.service.RepositoryClient;
 
 public class OcflFilesystemRepositoryClientTest {
     OcflRepository ocflRepositoryMock;
@@ -43,7 +42,7 @@ public class OcflFilesystemRepositoryClientTest {
         repositoryClient = new OcflFilesystemRepositoryClient(ocflRepositoryMock);
     }
 
-    public ObjectDetails createObjectDetails() {
+    private ObjectDetails createObjectDetails() {
         var fileaDetails = new FileDetails();
         fileaDetails.setPath("test.txt");
         fileaDetails.setStorageRelativePath("storage/A/test.txt");

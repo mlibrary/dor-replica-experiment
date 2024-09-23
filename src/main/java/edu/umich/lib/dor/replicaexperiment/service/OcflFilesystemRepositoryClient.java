@@ -19,7 +19,8 @@ import org.slf4j.LoggerFactory;
 import edu.umich.lib.dor.replicaexperiment.domain.Curator;
 
 public class OcflFilesystemRepositoryClient implements RepositoryClient {
-	private static final Logger log = LoggerFactory.getLogger(OcflFilesystemRepositoryClient.class);
+    private static final Logger log = LoggerFactory
+        .getLogger(OcflFilesystemRepositoryClient.class);
 
     private OcflRepository repo;
 
