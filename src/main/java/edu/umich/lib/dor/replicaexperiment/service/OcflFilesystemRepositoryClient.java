@@ -57,7 +57,7 @@ public class OcflFilesystemRepositoryClient implements RepositoryClient {
         return this;
     }
 
-    public RepositoryClient deleteObject(String id) {
+    public RepositoryClient purgeObject(String id) {
         repo.purgeObject(id);
         return this;
     }

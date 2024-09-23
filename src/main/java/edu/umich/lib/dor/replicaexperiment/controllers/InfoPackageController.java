@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -19,6 +20,8 @@ import edu.umich.lib.dor.replicaexperiment.domain.InfoPackage;
 import edu.umich.lib.dor.replicaexperiment.service.Deposit;
 import edu.umich.lib.dor.replicaexperiment.service.DepositFactory;
 import edu.umich.lib.dor.replicaexperiment.service.InfoPackageService;
+import edu.umich.lib.dor.replicaexperiment.service.Purge;
+import edu.umich.lib.dor.replicaexperiment.service.PurgeFactory;
 import edu.umich.lib.dor.replicaexperiment.service.Replication;
 import edu.umich.lib.dor.replicaexperiment.service.ReplicationFactory;
 import edu.umich.lib.dor.replicaexperiment.service.Update;
@@ -40,6 +43,9 @@ public class InfoPackageController {
 
     @Autowired
     private ReplicationFactory replicationFactory;
+
+    @Autowired
+    private PurgeFactory purgeFactory;
 
     @PostMapping(path="/deposit")
     public @ResponseBody InfoPackageDto deposit(
@@ -85,6 +91,16 @@ public class InfoPackageController {
         replication.execute();
         var newInfoPackage = infoPackageService.getInfoPackage(identifier);
         return new InfoPackageDto(newInfoPackage);
+    }
+
+    @DeleteMapping(path="/purge")
+    public @ResponseBody String purge(
+        @RequestParam String identifier,
+        @RequestParam String repository
+    ) {
+        Purge purge = purgeFactory.create(identifier, repository);
+        purge.execute();
+        return "Purged";
     }
 
     @GetMapping(path="/all")

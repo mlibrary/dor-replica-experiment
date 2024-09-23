@@ -15,6 +15,7 @@ import edu.umich.lib.dor.replicaexperiment.service.DepositDirectory;
 import edu.umich.lib.dor.replicaexperiment.service.DepositFactory;
 import edu.umich.lib.dor.replicaexperiment.service.InfoPackageService;
 import edu.umich.lib.dor.replicaexperiment.service.OcflFilesystemRepositoryClient;
+import edu.umich.lib.dor.replicaexperiment.service.PurgeFactory;
 import edu.umich.lib.dor.replicaexperiment.service.ReplicaService;
 import edu.umich.lib.dor.replicaexperiment.service.ReplicationFactory;
 import edu.umich.lib.dor.replicaexperiment.service.RepositoryClient;
@@ -128,6 +129,21 @@ public class AppConfig {
             replicaService,
             repositoryClientRegistry,
             stagingPath
+        );
+    }
+
+    @Bean
+    public PurgeFactory purgeFactory(
+        RepositoryClientRegistry repositoryClientRegistry,
+        RepositoryService repositoryService,
+        InfoPackageService infoPackageService,
+        ReplicaService replicaService
+    ) {
+        return new PurgeFactory(
+            infoPackageService,
+            repositoryService,
+            replicaService,
+            repositoryClientRegistry
         );
     }
 }

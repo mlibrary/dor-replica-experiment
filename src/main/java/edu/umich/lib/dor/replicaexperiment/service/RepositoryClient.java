@@ -10,11 +10,13 @@ public interface RepositoryClient {
 
     RepositoryClient readObject(String id, Path outputPath);
 
-    RepositoryClient deleteObject(String id);
+    RepositoryClient purgeObject(String id);
 
     boolean hasObject(String id);
 
-    RepositoryClient deleteObjectFile(String objectId, String filePath, Curator curator, String message);
+    RepositoryClient deleteObjectFile(
+        String objectId, String filePath, Curator curator, String message
+    );
 
     RepositoryClient updateObjectFiles(
         String objectId, Package sourcePackage, Curator curator, String message

@@ -73,7 +73,8 @@ public class ReplicationTest {
         when(repositoryServiceMock.getRepository("some_repo")).thenReturn(sourceRepositoryMock);
         when(registryMock.getClient("some_repo")).thenReturn(sourceClientMock);
         when(infoPackageMock.hasAReplicaIn("some_repo")).thenReturn(true);
-        when(repositoryServiceMock.getRepository("some_other_repo")).thenReturn(targetRepositoryMock);
+        when(repositoryServiceMock.getRepository("some_other_repo"))
+            .thenReturn(targetRepositoryMock);
         when(registryMock.getClient("some_other_repo")).thenReturn(targetClientMock);
 
         assertDoesNotThrow(() -> {
