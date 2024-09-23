@@ -44,7 +44,6 @@ public class DepositTest {
     OcflFilesystemRepositoryClient clientMock;
     Package sourcePackageMock;
 
-
     @BeforeEach
     void init() {
         this.packageServiceMock = mock(InfoPackageService.class);
