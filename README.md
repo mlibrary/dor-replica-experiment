@@ -57,14 +57,12 @@ docker compose run app gradle test
 ```
 
 To run individual test classes and get the best performance,
-start up the services without the Web server,
-then `exec` into the container. From there, you can run individual
+start up the services as normal, then `exec` into the container.
+From there, you can run individual
 test files like below, replacing `YourTest` with your test class.
 
 ```sh
-docker compose up database
-# In a separate terminal
-docker compose run app bash
+docker compose exec app bash
 # In the terminal that appears
 gradle test --tests YourTest
 ```
