@@ -2,7 +2,7 @@ FROM gradle:8.10-jdk21-jammy AS base
 
 WORKDIR /app/
 
-ENV GRADLE_USER_HOME /gradle_user_home/
+ENV GRADLE_USER_HOME /gradle/
 
 COPY build.gradle settings.gradle gradle.properties ./
 COPY src/ ./src/

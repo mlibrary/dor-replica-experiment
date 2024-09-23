@@ -24,7 +24,7 @@ services:
       - ./src:/app/src
       - ./repos:/app/repos
       - ./build:/app/build
-      - gradle-cache:/gradle_user_home/caches/
+      - gradle-cache:/gradle/caches/
     ports:
       - '8080:8080'
   deployment:
