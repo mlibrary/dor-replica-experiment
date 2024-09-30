@@ -1,7 +1,6 @@
 package edu.umich.lib.dor.replicaexperiment;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertIterableEquals;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -38,8 +37,8 @@ public class OcflFilesystemRepositoryClientTest {
     @BeforeEach
     public void init() {
         ocflRepositoryMock = mock(OcflRepository.class);
-        sourcePackageMock = mock(Package.class);
         repositoryClient = new OcflFilesystemRepositoryClient(ocflRepositoryMock);
+        sourcePackageMock = mock(Package.class);
     }
 
     private ObjectDetails createObjectDetails() {
@@ -47,7 +46,6 @@ public class OcflFilesystemRepositoryClientTest {
         fileaDetails.setPath("test.txt");
         fileaDetails.setStorageRelativePath("storage/A/test.txt");
 
-        
         var fileMap = new HashMap<String, FileDetails>();
         fileMap.put("A", fileaDetails);
         var versionDetails = new VersionDetails();
@@ -56,7 +54,6 @@ public class OcflFilesystemRepositoryClientTest {
         var versionMap = new HashMap<VersionNum, VersionDetails>();
         var versionNum = new VersionNum(1);
         versionMap.put(versionNum, versionDetails);
-
         var details = new ObjectDetails();
         details.setId("A");
         details.setHeadVersionNum(versionNum);
@@ -65,7 +62,7 @@ public class OcflFilesystemRepositoryClientTest {
     }
 
     @Test
-    public void clientWithInjectedCreationWorks() {
+    public void clientWithInjectedRepositoryWorks() {
         new OcflFilesystemRepositoryClient(ocflRepositoryMock);
     }
 
