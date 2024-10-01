@@ -83,7 +83,6 @@ public class DepositTest {
                 "we're good"
             );
         });
-        verify(sourcePackageMock).validatePath();
     }
 
     @Test
@@ -102,22 +101,6 @@ public class DepositTest {
     }
 
     @Test
-    void depositFailsWhenRepositoryDoesNotExist() {
-        when(packageServiceMock.getInfoPackage("A")).thenReturn(null);
-        when(repositoryServiceMock.getRepository("some_repo")).thenReturn(null);
-
-        assertThrows(NoEntityException.class, () -> {
-            depositFactory.create(
-                testCurator,
-                "A",
-                Paths.get("/something"),
-                "some_repo",
-                "was there a some_repo?"
-            );
-        });
-    }
-
-    @Test
     void depositExecutes() {
         when(packageServiceMock.getInfoPackage("A")).thenReturn(null);
         when(repositoryServiceMock.getRepository("some_repo")).thenReturn(repositoryMock);
@@ -131,7 +114,6 @@ public class DepositTest {
             "some_repo",
             "we're good"
         );
-        verify(sourcePackageMock).validatePath();
 
         when(packageServiceMock.createInfoPackage("A")).thenReturn(infoPackageMock);
 

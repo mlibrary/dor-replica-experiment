@@ -28,7 +28,7 @@ public class DepositDirectoryTest {
 
     @Test
     public void depositDirectoryProvidesAccessToPackages() {
-        var packagePath = Paths.get("some_package");
+        var packagePath = Paths.get("deposit_one");
         depositDir.getPackage(packagePath);
     }
 }
