@@ -1,6 +1,6 @@
 package edu.umich.lib.dor.replicaexperiment;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -66,10 +66,10 @@ public class PurgeTest {
 
     @Test
     void purgeFailsWhenInfoPackageDoesNotExist() {
-        when(packageServiceMock.getInfoPackage("A")).thenReturn(null);
+        when(packageServiceMock.getInfoPackage("?")).thenReturn(null);
     
         assertThrows(NoEntityException.class, () -> {
-            purgeFactory.create("A", "some_repo");
+            purgeFactory.create("?", "some_repo");
         });
     }
 
@@ -85,12 +85,11 @@ public class PurgeTest {
 
     @Test
     void purgeFailsWhenInfoPackageDoesNotHaveReplicaInRepository() {
-        Repository sourceRepositoryMock = mock(Repository.class);
-
         when(packageServiceMock.getInfoPackage("A")).thenReturn(infoPackageMock);
-        when(repositoryServiceMock.getRepository("some_repo")).thenReturn(sourceRepositoryMock);
+        when(repositoryServiceMock.getRepository("some_repo")).thenReturn(repositoryMock);
         when(registryMock.getClient("some_repo")).thenReturn(clientMock);
-        when(infoPackageMock.hasAReplicaIn("some_repo")).thenReturn(false);
+        when(replicaServiceMock.getReplica(infoPackageMock, repositoryMock))
+            .thenReturn(null);
 
         assertThrows(NoEntityException.class, () -> {
             purgeFactory.create("A", "some_repo");
