@@ -6,17 +6,10 @@ import edu.umich.lib.dor.replicaexperiment.domain.Repository;
 import edu.umich.lib.dor.replicaexperiment.exception.NoEntityException;
 
 public class Purge implements Command {
-    private InfoPackageService packageService;
-    private RepositoryService repositoryService;
     private ReplicaService replicaService;
-    private RepositoryClientRegistry clientRegistry;
     private String packageIdentifier;
-    private String repositoryName;
 
-    private InfoPackage infoPackage;
-    private Repository repository;
-    private Replica replica; 
-
+    private Replica replica;
     private RepositoryClient repositoryClient;
 
     public Purge(
@@ -27,15 +20,10 @@ public class Purge implements Command {
         String packageIdentifier,
         String repositoryName
     ) {
-        this.packageService = packageService;
-        this.repositoryService = repositoryService;
         this.replicaService = replicaService;
-        this.clientRegistry = clientRegistry;
         this.packageIdentifier = packageIdentifier;
-        this.repositoryName = repositoryName;
 
-        this.packageIdentifier = packageIdentifier;
-        this.infoPackage = packageService.getInfoPackage(packageIdentifier);
+        InfoPackage infoPackage = packageService.getInfoPackage(packageIdentifier);
         if (infoPackage == null) {
             throw new NoEntityException(
                 String.format(
@@ -45,7 +33,7 @@ public class Purge implements Command {
             );
         }
 
-        this.repository = repositoryService.getRepository(repositoryName);
+        Repository repository = repositoryService.getRepository(repositoryName);
         if (repository == null) {
             throw new NoEntityException(
                 String.format(
@@ -54,8 +42,8 @@ public class Purge implements Command {
                 )
             );
         }
-
         this.repositoryClient = clientRegistry.getClient(repositoryName);
+
         this.replica = this.replicaService.getReplica(infoPackage, repository);
         if (replica == null) {
             throw new NoEntityException(
