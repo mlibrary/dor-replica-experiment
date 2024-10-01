@@ -70,7 +70,6 @@ public class Deposit implements Command {
 
         this.repositoryClient = repositoryClientRegistry.getClient(repositoryName);
         this.sourcePackage = depositDir.getPackage(sourcePath);
-        this.sourcePackage.validatePath();
     }
 
     public void execute() {

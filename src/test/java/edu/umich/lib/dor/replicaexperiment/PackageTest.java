@@ -45,14 +45,13 @@ public class PackageTest {
         assertEquals(testDepositPath.resolve("deposit_one"), pkg.getRootPath());
     }
 
-
     @Test
     public void existingPackagePassesValidation() {
         assertDoesNotThrow(() -> {
             new Package(
                 new DepositDirectory(testDepositPath),
                 Paths.get("deposit_one")
-            ).validatePath();
+            );
         });
     }
 
@@ -62,7 +61,7 @@ public class PackageTest {
             new Package(
                 new DepositDirectory(testDepositPath),
                 Paths.get("no_such_deposit")
-            ).validatePath();
+            );
         });
     }
 

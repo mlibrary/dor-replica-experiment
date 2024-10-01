@@ -81,7 +81,6 @@ public class Update implements Command {
         }
 
         this.sourcePackage = depositDir.getPackage(sourcePath);
-        this.sourcePackage.validatePath();
     }
 
     public void execute() {

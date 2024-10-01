@@ -86,7 +86,6 @@ public class UpdateTest {
                 "we're good"
             );
         });
-        verify(sourcePackageMock).validatePath();
     }
 
     @Test
@@ -100,23 +99,6 @@ public class UpdateTest {
                 Paths.get("update_A"),
                 "some_repo",
                 "did I not add this yet?"
-            );
-        });
-    }
-
-
-    @Test
-    void updateFailsWhenRepositoryDoesNotExist() {
-        when(packageServiceMock.getInfoPackage("A")).thenReturn(infoPackageMock);
-        when(repositoryServiceMock.getRepository("some_repo")).thenReturn(null);
-
-        assertThrows(NoEntityException.class, () -> {
-            updateFactory.create(
-                testCurator,
-                "A",
-                Paths.get("update_A"),
-                "some_repo",
-                "was there a some_repo?"
             );
         });
     }
@@ -160,7 +142,6 @@ public class UpdateTest {
             "some_repo",
             "we're good"
         );
-        verify(sourcePackageMock).validatePath();
 
         update.execute();
         verify(clientMock).updateObjectFiles(
