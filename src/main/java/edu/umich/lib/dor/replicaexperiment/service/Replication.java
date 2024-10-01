@@ -13,13 +13,12 @@ public class Replication implements Command {
     RepositoryClientRegistry repositoryClientRegistry;
     Path stagingPath;
     String packageIdentifier;
-    Repository sourceRepository;
-    RepositoryClient sourceRepositoryClient;
-    String targetRepositoryName;
-    Repository targetRepository;
-    RepositoryClient targetRepositoryClient;
 
     InfoPackage infoPackage;
+    Repository sourceRepository;
+    RepositoryClient sourceRepositoryClient;
+    Repository targetRepository;
+    RepositoryClient targetRepositoryClient;
 
     public Replication(
         InfoPackageService infoPackageService,
@@ -58,7 +57,8 @@ public class Replication implements Command {
             );
         }
         this.sourceRepositoryClient = repositoryClientRegistry.getClient(sourceRepositoryName);
-        if (!infoPackage.hasAReplicaIn(sourceRepositoryName)) {
+        var sourceReplica = replicaService.getReplica(infoPackage, sourceRepository);
+        if (sourceReplica == null) {
             throw new NoEntityException(
                 String.format(
                     "No replica for package \"%s\" was found in repository \"%s\".",
@@ -68,7 +68,6 @@ public class Replication implements Command {
             );
         }
 
-        this.targetRepositoryName = targetRepositoryName;
         this.targetRepository = repositoryService.getRepository(targetRepositoryName);
         if (targetRepository == null) {
             throw new NoEntityException(
@@ -86,7 +85,6 @@ public class Replication implements Command {
         sourceRepositoryClient.exportObject(packageIdentifier, objectPathInStaging);
         targetRepositoryClient.importObject(objectPathInStaging);
 
-        targetRepository = repositoryService.getRepository(targetRepositoryName);
         replicaService.createReplica(infoPackage, targetRepository);
     }
 }

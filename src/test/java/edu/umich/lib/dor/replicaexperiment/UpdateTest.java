@@ -5,9 +5,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -44,7 +42,6 @@ public class UpdateTest {
     OcflFilesystemRepositoryClient clientMock;
     Package sourcePackageMock;
 
-
     @BeforeEach
     void init() {
         this.packageServiceMock = mock(InfoPackageService.class);
@@ -72,7 +69,8 @@ public class UpdateTest {
     void updateCanBeCreated() {
         when(packageServiceMock.getInfoPackage("A")).thenReturn(infoPackageMock);
         when(repositoryServiceMock.getRepository("some_repo")).thenReturn(repositoryMock);
-        when(infoPackageMock.hasAReplicaIn("some_repo")).thenReturn(true);
+        when(replicaServiceMock.getReplica(infoPackageMock, repositoryMock))
+            .thenReturn(replicaMock);
 
         when(registryMock.getClient("some_repo")).thenReturn(clientMock);
         when(depositDirMock.getPackage(Paths.get("update_A"))).thenReturn(sourcePackageMock);
@@ -108,7 +106,8 @@ public class UpdateTest {
         when(packageServiceMock.getInfoPackage("A")).thenReturn(infoPackageMock);
         when(repositoryServiceMock.getRepository("some_repo")).thenReturn(repositoryMock);
         when(registryMock.getClient("some_repo")).thenReturn(clientMock);
-        when(infoPackageMock.hasAReplicaIn("some_repo")).thenReturn(false);
+        when(replicaServiceMock.getReplica(infoPackageMock, repositoryMock))
+            .thenReturn(null);
 
         assertThrows(NoEntityException.class, () -> {
             updateFactory.create(
@@ -126,12 +125,8 @@ public class UpdateTest {
         when(packageServiceMock.getInfoPackage("A")).thenReturn(infoPackageMock);
         when(repositoryServiceMock.getRepository("some_repo")).thenReturn(repositoryMock);
         when(registryMock.getClient("some_repo")).thenReturn(clientMock);
-        when(infoPackageMock.hasAReplicaIn("some_repo")).thenReturn(true);
-
-        List<Path> newPackagePaths = List.of(
-            Paths.get("something.txt"),
-            Paths.get("something_new.txt")
-        );
+        when(replicaServiceMock.getReplica(infoPackageMock, repositoryMock))
+            .thenReturn(replicaMock);
 
         when(depositDirMock.getPackage(Paths.get("update_A"))).thenReturn(sourcePackageMock);
 
@@ -150,6 +145,6 @@ public class UpdateTest {
             testCurator,
             "we're good"
         );
-        verify(replicaServiceMock).updateReplica(infoPackageMock, repositoryMock);
+        verify(replicaServiceMock).updateReplica(replicaMock);
     }
 }

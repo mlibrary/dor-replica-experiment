@@ -45,10 +45,7 @@ public class ReplicaService {
         return matchingReplicas.getFirst();
     }
 
-    public Replica updateReplica(
-        InfoPackage infoPackage, Repository repository
-    ) {
-        var replica = getReplica(infoPackage, repository);
+    public Replica updateReplica(Replica replica) {
         replica.setUpdatedAt(Instant.now());
         replicaRepo.save(replica);
         return replica;

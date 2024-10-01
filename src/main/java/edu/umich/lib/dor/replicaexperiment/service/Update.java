@@ -1,10 +1,10 @@
 package edu.umich.lib.dor.replicaexperiment.service;
 
 import java.nio.file.Path;
-import java.util.List;
 
 import edu.umich.lib.dor.replicaexperiment.domain.Curator;
 import edu.umich.lib.dor.replicaexperiment.domain.InfoPackage;
+import edu.umich.lib.dor.replicaexperiment.domain.Replica;
 import edu.umich.lib.dor.replicaexperiment.domain.Repository;
 import edu.umich.lib.dor.replicaexperiment.exception.NoEntityException;
 
@@ -24,8 +24,7 @@ public class Update implements Command {
     Repository repository;
     RepositoryClient repositoryClient;
     Package sourcePackage;
-    Path updatePackagePath;
-    List<Path> updateFilePaths;
+    Replica replica;
 
     public Update(
         InfoPackageService infoPackageService,
@@ -70,7 +69,8 @@ public class Update implements Command {
             );
         }
         this.repositoryClient = repositoryClientRegistry.getClient(repositoryName);
-        if (!existingPackage.hasAReplicaIn(repositoryName)) {
+        this.replica = replicaService.getReplica(existingPackage, repository);
+        if (replica == null) {
             throw new NoEntityException(
                 String.format(
                     "No replica for package \"%s\" was found in repository \"%s\".",
@@ -90,6 +90,6 @@ public class Update implements Command {
             curator,
             message
         );
-        replicaService.updateReplica(existingPackage, repository);
+        replicaService.updateReplica(replica);
     }
 }
