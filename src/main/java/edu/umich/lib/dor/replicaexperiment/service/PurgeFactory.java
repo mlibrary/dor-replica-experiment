@@ -3,18 +3,18 @@ package edu.umich.lib.dor.replicaexperiment.service;
 public class PurgeFactory {
     private InfoPackageService infoPackageService;
     private RepositoryService repositoryService;
-    private ReplicaService replicaservice;
+    private ReplicaService replicaService;
     private RepositoryClientRegistry repositoryClientRegistry;
 
     public PurgeFactory(
         InfoPackageService infoPackageService,
         RepositoryService repositoryService,
-        ReplicaService replicaservice,
+        ReplicaService replicaService,
         RepositoryClientRegistry repositoryClientRegistry
     ) {
         this.infoPackageService = infoPackageService;
         this.repositoryService = repositoryService;
-        this.replicaservice = replicaservice;
+        this.replicaService = replicaService;
         this.repositoryClientRegistry = repositoryClientRegistry;
     }
 
@@ -25,7 +25,7 @@ public class PurgeFactory {
         return new Purge(
             infoPackageService,
             repositoryService,
-            replicaservice,
+            replicaService,
             repositoryClientRegistry,
             packageIdentifier,
             repositoryName
