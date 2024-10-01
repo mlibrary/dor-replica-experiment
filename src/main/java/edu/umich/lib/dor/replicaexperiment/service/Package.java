@@ -11,6 +11,13 @@ public class Package {
     protected final DepositDirectory depositDir;
     protected final Path packagePath;
 
+    public Package(DepositDirectory depositDir, Path packagePath) {
+        this.depositDir = depositDir;
+        this.packagePath = packagePath;
+
+        validatePath();
+    }
+
     public Path getRootPath() {
         return depositDir.resolve(packagePath);
     }
@@ -21,13 +28,6 @@ public class Package {
                 String.format("No content exists at path %s.", packagePath.toString())
             );
         }
-    }
-
-    public Package(DepositDirectory depositDir, Path packagePath) {
-        this.depositDir = depositDir;
-        this.packagePath = packagePath;
-
-        validatePath();
     }
 
     public List<Path> getFilePaths() {
