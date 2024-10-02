@@ -3,21 +3,17 @@ package edu.umich.lib.dor.replicaexperiment.service;
 import java.nio.file.Path;
 
 import edu.umich.lib.dor.replicaexperiment.domain.Curator;
+import edu.umich.lib.dor.replicaexperiment.domain.InfoPackage;
 import edu.umich.lib.dor.replicaexperiment.domain.Repository;
 import edu.umich.lib.dor.replicaexperiment.exception.EntityAlreadyExistsException;
 import edu.umich.lib.dor.replicaexperiment.exception.NoEntityException;
 
 public class Deposit implements Command {
-    InfoPackageService infoPackageService;
-    RepositoryService repositoryService;
-    ReplicaService replicaService;
-    RepositoryClientRegistry repositoryClientRegistry;
-    DepositDirectory depositDir;
+    private InfoPackageService infoPackageService;
+    private ReplicaService replicaService;
 
-    Curator curator;
-    String packageIdentifier;
-    Path sourcePath;
-    String repositoryName;
+    private Curator curator;
+    private String packageIdentifier;
     String message;
 
     Repository repository;
@@ -37,18 +33,13 @@ public class Deposit implements Command {
         String message
     ) {
         this.infoPackageService = infoPackageService;
-        this.repositoryService = repositoryService;
         this.replicaService = replicaService;
-        this.repositoryClientRegistry = repositoryClientRegistry;
-        this.depositDir = depositDir;
 
         this.curator = curator;
         this.packageIdentifier = packageIdentifier;
-        this.sourcePath = sourcePath;
-        this.repositoryName = repositoryName;
         this.message = message;
 
-        var existingPackage = infoPackageService.getInfoPackage(packageIdentifier);
+        InfoPackage existingPackage = infoPackageService.getInfoPackage(packageIdentifier);
         if (existingPackage != null) {
             throw new EntityAlreadyExistsException(
                 String.format(
@@ -77,7 +68,7 @@ public class Deposit implements Command {
             packageIdentifier, sourcePackage, curator, message
         );
 
-        var infoPackage = infoPackageService.createInfoPackage(packageIdentifier);
+        InfoPackage infoPackage = infoPackageService.createInfoPackage(packageIdentifier);
         replicaService.createReplica(infoPackage, repository);
     }
 }

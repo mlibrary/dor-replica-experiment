@@ -8,18 +8,14 @@ import edu.umich.lib.dor.replicaexperiment.domain.Repository;
 import edu.umich.lib.dor.replicaexperiment.exception.NoEntityException;
 
 public class Replication implements Command {
-    InfoPackageService infoPackageService;
-    RepositoryService repositoryService;
-    ReplicaService replicaService;
-    RepositoryClientRegistry repositoryClientRegistry;
-    Path stagingPath;
-    String packageIdentifier;
+    private ReplicaService replicaService;
+    private Path stagingPath;
+    private String packageIdentifier;
 
-    InfoPackage infoPackage;
-    Repository sourceRepository;
-    RepositoryClient sourceRepositoryClient;
-    Repository targetRepository;
-    RepositoryClient targetRepositoryClient;
+    private InfoPackage infoPackage;
+    private RepositoryClient sourceRepositoryClient;
+    private Repository targetRepository;
+    private RepositoryClient targetRepositoryClient;
 
     public Replication(
         InfoPackageService infoPackageService,
@@ -31,13 +27,10 @@ public class Replication implements Command {
         String sourceRepositoryName,
         String targetRepositoryName
     ) {
-        this.infoPackageService = infoPackageService;
-        this.repositoryService = repositoryService;
         this.replicaService = replicaService;
-        this.repositoryClientRegistry = repositoryClientRegistry;
         this.stagingPath = stagingPath;
-
         this.packageIdentifier = packageIdentifier;
+
         this.infoPackage = infoPackageService.getInfoPackage(packageIdentifier);
         if (infoPackage == null) {
             throw new NoEntityException(
@@ -48,7 +41,7 @@ public class Replication implements Command {
             );
         }
 
-        this.sourceRepository = repositoryService.getRepository(sourceRepositoryName);
+        Repository sourceRepository = repositoryService.getRepository(sourceRepositoryName);
         if (sourceRepository == null) {
             throw new NoEntityException(
                 String.format(

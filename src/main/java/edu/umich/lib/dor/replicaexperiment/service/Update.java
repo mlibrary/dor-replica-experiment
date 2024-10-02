@@ -9,22 +9,14 @@ import edu.umich.lib.dor.replicaexperiment.domain.Repository;
 import edu.umich.lib.dor.replicaexperiment.exception.NoEntityException;
 
 public class Update implements Command {
-    InfoPackageService infoPackageService;
-    RepositoryService repositoryService;
-    ReplicaService replicaService;
-    RepositoryClientRegistry repositoryClientRegistry;
-    DepositDirectory depositDir;
-    Curator curator;
-    String packageIdentifier;
-    Path sourcePath;
-    String repositoryName;
-    String message;
+    private ReplicaService replicaService;
+    private Curator curator;
+    private String packageIdentifier;
+    private String message;
 
-    InfoPackage existingPackage;
-    Repository repository;
-    RepositoryClient repositoryClient;
-    Package sourcePackage;
-    Replica replica;
+    private RepositoryClient repositoryClient;
+    private Package sourcePackage;
+    private Replica replica;
 
     public Update(
         InfoPackageService infoPackageService,
@@ -38,18 +30,12 @@ public class Update implements Command {
         String repositoryName,
         String message
     ) {
-        this.infoPackageService = infoPackageService;
-        this.repositoryService = repositoryService;
         this.replicaService = replicaService;
-        this.repositoryClientRegistry = repositoryClientRegistry;
-        this.depositDir = depositDir;
         this.curator = curator;
         this.packageIdentifier = packageIdentifier;
-        this.sourcePath = sourcePath;
-        this.repositoryName = repositoryName;
         this.message = message;
 
-        this.existingPackage = infoPackageService.getInfoPackage(packageIdentifier);
+        InfoPackage existingPackage = infoPackageService.getInfoPackage(packageIdentifier);
         if (existingPackage == null) {
             throw new NoEntityException(
                 String.format(
@@ -59,7 +45,7 @@ public class Update implements Command {
             );
         }
 
-        this.repository = repositoryService.getRepository(repositoryName);
+        Repository repository = repositoryService.getRepository(repositoryName);
         if (repository == null) {
             throw new NoEntityException(
                 String.format(

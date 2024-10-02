@@ -16,7 +16,6 @@ import edu.umich.lib.dor.replicaexperiment.domain.InfoPackage;
 import edu.umich.lib.dor.replicaexperiment.domain.Replica;
 import edu.umich.lib.dor.replicaexperiment.domain.Repository;
 import edu.umich.lib.dor.replicaexperiment.exception.EntityAlreadyExistsException;
-import edu.umich.lib.dor.replicaexperiment.exception.NoEntityException;
 import edu.umich.lib.dor.replicaexperiment.service.Deposit;
 import edu.umich.lib.dor.replicaexperiment.service.DepositDirectory;
 import edu.umich.lib.dor.replicaexperiment.service.DepositFactory;
