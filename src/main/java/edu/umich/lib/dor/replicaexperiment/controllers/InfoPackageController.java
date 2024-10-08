@@ -22,13 +22,11 @@ import edu.umich.lib.dor.replicaexperiment.service.DepositFactory;
 import edu.umich.lib.dor.replicaexperiment.service.InfoPackageService;
 import edu.umich.lib.dor.replicaexperiment.service.Purge;
 import edu.umich.lib.dor.replicaexperiment.service.PurgeFactory;
-import edu.umich.lib.dor.replicaexperiment.service.Replication;
-import edu.umich.lib.dor.replicaexperiment.service.ReplicationFactory;
 import edu.umich.lib.dor.replicaexperiment.service.Update;
 import edu.umich.lib.dor.replicaexperiment.service.UpdateFactory;
 
 @Controller
-@RequestMapping(path="/package")
+@RequestMapping(path = "/package")
 public class InfoPackageController {
     Curator testCurator = new Curator("test", "test@example.edu");
 
@@ -42,68 +40,48 @@ public class InfoPackageController {
     private UpdateFactory updateFactory;
 
     @Autowired
-    private ReplicationFactory replicationFactory;
-
-    @Autowired
     private PurgeFactory purgeFactory;
 
-    @PostMapping(path="/deposit")
+    @PostMapping(path = "/deposit")
     public @ResponseBody InfoPackageDto deposit(
         @RequestParam String identifier,
         @RequestParam String depositSourcePath,
-        @RequestParam String repository,
         @RequestParam String message
     ) {
         Path sourcePathRelativeToDeposit = Paths.get(depositSourcePath);
         Deposit deposit = depositFactory.create(
-            testCurator, identifier, sourcePathRelativeToDeposit, repository, message
+            testCurator, identifier, sourcePathRelativeToDeposit, message
         );
         deposit.execute();
         var newInfoPackage = infoPackageService.getInfoPackage(identifier);
         return new InfoPackageDto(newInfoPackage);
     }
 
-    @PostMapping(path="/update")
+    @PutMapping(path = "/update")
     public @ResponseBody InfoPackageDto update(
         @RequestParam String identifier,
         @RequestParam String depositSourcePath,
-        @RequestParam String repository,
         @RequestParam String message
     ) {
         Path sourcePathRelativeToDeposit = Paths.get(depositSourcePath);
         Update update = updateFactory.create(
-            testCurator, identifier, sourcePathRelativeToDeposit, repository, message
+            testCurator, identifier, sourcePathRelativeToDeposit, message
         );
         update.execute();
         var newInfoPackage = infoPackageService.getInfoPackage(identifier);
         return new InfoPackageDto(newInfoPackage);
     }
 
-    @PutMapping(path="/replicate")
-    public @ResponseBody InfoPackageDto replicate(
-        @RequestParam String identifier,
-        @RequestParam String sourceRepository,
-        @RequestParam String targetRepository
-    ) {
-        Replication replication = replicationFactory.create(
-            identifier, sourceRepository, targetRepository
-        );
-        replication.execute();
-        var newInfoPackage = infoPackageService.getInfoPackage(identifier);
-        return new InfoPackageDto(newInfoPackage);
-    }
-
-    @DeleteMapping(path="/purge")
+    @DeleteMapping(path = "/purge")
     public @ResponseBody String purge(
-        @RequestParam String identifier,
-        @RequestParam String repository
+        @RequestParam String identifier
     ) {
-        Purge purge = purgeFactory.create(identifier, repository);
+        Purge purge = purgeFactory.create(identifier);
         purge.execute();
         return "Purged";
     }
 
-    @GetMapping(path="/all")
+    @GetMapping(path = "/all")
     public @ResponseBody Iterable<InfoPackageDto> getAllInfoPackages() {
         List<InfoPackage> infoPackages = infoPackageService.getAllInfoPackages();
         return infoPackages

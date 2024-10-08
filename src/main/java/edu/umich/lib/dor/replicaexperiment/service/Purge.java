@@ -1,56 +1,30 @@
 package edu.umich.lib.dor.replicaexperiment.service;
 
 import edu.umich.lib.dor.replicaexperiment.domain.InfoPackage;
-import edu.umich.lib.dor.replicaexperiment.domain.Replica;
-import edu.umich.lib.dor.replicaexperiment.domain.Repository;
 import edu.umich.lib.dor.replicaexperiment.exception.NoEntityException;
 
 public class Purge implements Command {
-    private ReplicaService replicaService;
+    private InfoPackageService infoPackageService;
+    private RepositoryClient repositoryClient;
     private String packageIdentifier;
 
-    private Replica replica;
-    private RepositoryClient repositoryClient;
+    private InfoPackage infoPackage;
 
     public Purge(
-        InfoPackageService packageService,
-        RepositoryService repositoryService,
-        ReplicaService replicaService,
-        RepositoryClientRegistry clientRegistry,
-        String packageIdentifier,
-        String repositoryName
+        InfoPackageService infoPackageService,
+        RepositoryClient repositoryClient,
+        String packageIdentifier
     ) {
-        this.replicaService = replicaService;
+        this.infoPackageService = infoPackageService;
+        this.repositoryClient = repositoryClient;
         this.packageIdentifier = packageIdentifier;
 
-        InfoPackage infoPackage = packageService.getInfoPackage(packageIdentifier);
+        this.infoPackage = infoPackageService.getInfoPackage(packageIdentifier);
         if (infoPackage == null) {
             throw new NoEntityException(
                 String.format(
-                    "No packaged with identifier \"%s\" was found.",
+                    "No package with identifier \"%s\" was found.",
                     packageIdentifier
-                )
-            );
-        }
-
-        Repository repository = repositoryService.getRepository(repositoryName);
-        if (repository == null) {
-            throw new NoEntityException(
-                String.format(
-                    "No repository with name \"%s\" was found.",
-                    repositoryName
-                )
-            );
-        }
-        this.repositoryClient = clientRegistry.getClient(repositoryName);
-
-        this.replica = this.replicaService.getReplica(infoPackage, repository);
-        if (replica == null) {
-            throw new NoEntityException(
-                String.format(
-                    "No replica for package \"%s\" was found in repository \"%s\".",
-                    packageIdentifier,
-                    repositoryName
                 )
             );
         }
@@ -58,6 +32,6 @@ public class Purge implements Command {
 
     public void execute() {
         repositoryClient.purgeObject(packageIdentifier);
-        replicaService.deleteReplica(replica);
+        infoPackageService.deleteInfoPackage(infoPackage);
     }
 }

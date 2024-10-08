@@ -1,22 +1,20 @@
 package edu.umich.lib.dor.replicaexperiment.controllers.dtos;
 
-import java.util.List;
+import java.time.Instant;
 
 import edu.umich.lib.dor.replicaexperiment.domain.InfoPackage;
 
 public class InfoPackageDto {
     private Long id;
     private String identifier;
-    private List<NestedReplicaDto> replicas;
+    private Instant createdAt;
+    private Instant updatedAt;
 
     public InfoPackageDto(InfoPackage infoPackage) {
         this.id = infoPackage.getId();
         this.identifier = infoPackage.getIdentifier();
-        this.replicas = infoPackage
-            .getReplicas()
-            .stream()
-            .map(replica -> { return new NestedReplicaDto(replica); })
-            .toList();
+        this.createdAt = infoPackage.getCreatedAt();
+        this.updatedAt = infoPackage.getUpdatedAt();
     }
 
     public Long getId() {
@@ -27,7 +25,11 @@ public class InfoPackageDto {
         return identifier;
     }
 
-    public List<NestedReplicaDto> getReplicas() {
-        return replicas;
+    public Instant getCreatedAt() {
+        return createdAt;
     }
-};
+
+    public Instant getUpdatedAt() {
+        return updatedAt;
+    }
+}
