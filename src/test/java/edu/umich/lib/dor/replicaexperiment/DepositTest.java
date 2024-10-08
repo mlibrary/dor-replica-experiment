@@ -45,6 +45,7 @@ public class DepositTest {
             depositDirMock
         );
 
+        this.infoPackageMock = mock(InfoPackage.class);
         this.sourcePackageMock = mock(Package.class);
     }
 
