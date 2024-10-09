@@ -11,7 +11,7 @@ EXPOSE 8080
 
 CMD ["gradle", "build"]
 
-FROM gradle:8.10-jdk21-jammy as build
+FROM gradle:8.10-jdk21-jammy AS build
 
 WORKDIR /app/
 

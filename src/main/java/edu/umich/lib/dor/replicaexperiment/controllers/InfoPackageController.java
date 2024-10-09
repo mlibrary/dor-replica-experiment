@@ -4,6 +4,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import edu.umich.lib.dor.replicaexperiment.controllers.dtos.InfoPackageDto;
 import edu.umich.lib.dor.replicaexperiment.domain.Curator;
 import edu.umich.lib.dor.replicaexperiment.domain.InfoPackage;
+import edu.umich.lib.dor.replicaexperiment.messaging.messages.DepositMessage;
 import edu.umich.lib.dor.replicaexperiment.service.Deposit;
 import edu.umich.lib.dor.replicaexperiment.service.DepositFactory;
 import edu.umich.lib.dor.replicaexperiment.service.InfoPackageService;
@@ -41,6 +43,28 @@ public class InfoPackageController {
 
     @Autowired
     private PurgeFactory purgeFactory;
+
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
+
+    @GetMapping(path = "/test")
+    public @ResponseBody String test() {
+        rabbitTemplate.convertAndSend("testQueue", "Hello, world!");
+        return "sent";
+    }
+
+    @PostMapping(path = "/deposit-message")
+    public @ResponseBody String depositMessage(
+        @RequestParam String packageIdentifier,
+        @RequestParam String depositSourcePath,
+        @RequestParam String message
+    ) {
+        DepositMessage depositMessage = new DepositMessage(
+            packageIdentifier, depositSourcePath, message
+        );
+        rabbitTemplate.convertAndSend("depositQueue", depositMessage);
+        return "depositing";
+    }
 
     @PostMapping(path = "/deposit")
     public @ResponseBody InfoPackageDto deposit(
