@@ -6,22 +6,16 @@ import edu.umich.lib.dor.replicaexperiment.domain.Curator;
 
 public class UpdateFactory {
     InfoPackageService infoPackageService;
-    RepositoryService repositoryService;
-    ReplicaService replicaService;
-    RepositoryClientRegistry repositoryClientRegistry;
+    RepositoryClient repositoryClient;
     DepositDirectory depositDir;
 
     public UpdateFactory(
         InfoPackageService infoPackageService,
-        RepositoryService repositoryService,
-        ReplicaService replicaService,
-        RepositoryClientRegistry repositoryClientRegistry,
+        RepositoryClient repositoryClient,
         DepositDirectory depositDir
     ) {
         this.infoPackageService = infoPackageService;
-        this.repositoryService = repositoryService;
-        this.replicaService = replicaService;
-        this.repositoryClientRegistry = repositoryClientRegistry;
+        this.repositoryClient = repositoryClient;
         this.depositDir = depositDir;
     }
 
@@ -29,19 +23,15 @@ public class UpdateFactory {
         Curator curator,
         String packageIdentifier,
         Path sourcePath,
-        String repositoryName,
         String message
     ) {
         return new Update(
             infoPackageService,
-            repositoryService,
-            replicaService,
-            repositoryClientRegistry,
+            repositoryClient,
             depositDir,
             curator,
             packageIdentifier,
             sourcePath,
-            repositoryName,
             message
         );
     }

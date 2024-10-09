@@ -11,17 +11,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import edu.umich.lib.dor.replicaexperiment.domain.InfoPackage;
-import edu.umich.lib.dor.replicaexperiment.domain.Replica;
-import edu.umich.lib.dor.replicaexperiment.domain.Repository;
 import edu.umich.lib.dor.replicaexperiment.domain.Curator;
 import edu.umich.lib.dor.replicaexperiment.exception.NoEntityException;
 import edu.umich.lib.dor.replicaexperiment.service.DepositDirectory;
 import edu.umich.lib.dor.replicaexperiment.service.InfoPackageService;
-import edu.umich.lib.dor.replicaexperiment.service.OcflFilesystemRepositoryClient;
 import edu.umich.lib.dor.replicaexperiment.service.Package;
-import edu.umich.lib.dor.replicaexperiment.service.ReplicaService;
-import edu.umich.lib.dor.replicaexperiment.service.RepositoryClientRegistry;
-import edu.umich.lib.dor.replicaexperiment.service.RepositoryService;
+import edu.umich.lib.dor.replicaexperiment.service.RepositoryClient;
 import edu.umich.lib.dor.replicaexperiment.service.Update;
 import edu.umich.lib.dor.replicaexperiment.service.UpdateFactory;
 
@@ -29,50 +24,34 @@ public class UpdateTest {
     Curator testCurator = new Curator("test", "test@example.edu");
 
     InfoPackageService packageServiceMock;
-    RepositoryService repositoryServiceMock;
-    ReplicaService replicaServiceMock;
-    RepositoryClientRegistry registryMock;
+    RepositoryClient repositoryClientMock;
     DepositDirectory depositDirMock;
 
     UpdateFactory updateFactory;
 
     InfoPackage infoPackageMock;
-    Repository repositoryMock;
-    Replica replicaMock;
-    OcflFilesystemRepositoryClient clientMock;
     Package sourcePackageMock;
 
     @BeforeEach
     void init() {
         this.packageServiceMock = mock(InfoPackageService.class);
-        this.repositoryServiceMock = mock(RepositoryService.class);
-        this.replicaServiceMock = mock(ReplicaService.class);
-        this.registryMock = mock(RepositoryClientRegistry.class);
+        this.repositoryClientMock = mock(RepositoryClient.class);
         this.depositDirMock = mock(DepositDirectory.class);
 
         this.updateFactory = new UpdateFactory(
             packageServiceMock,
-            repositoryServiceMock,
-            replicaServiceMock,
-            registryMock,
+            repositoryClientMock,
             depositDirMock
         );
 
         this.infoPackageMock = mock(InfoPackage.class);
-        this.repositoryMock = mock(Repository.class);
-        this.replicaMock = mock(Replica.class);
-        this.clientMock = mock(OcflFilesystemRepositoryClient.class);
         this.sourcePackageMock = mock(Package.class);
     }
 
     @Test
     void updateCanBeCreated() {
         when(packageServiceMock.getInfoPackage("A")).thenReturn(infoPackageMock);
-        when(repositoryServiceMock.getRepository("some_repo")).thenReturn(repositoryMock);
-        when(replicaServiceMock.getReplica(infoPackageMock, repositoryMock))
-            .thenReturn(replicaMock);
 
-        when(registryMock.getClient("some_repo")).thenReturn(clientMock);
         when(depositDirMock.getPackage(Paths.get("update_A"))).thenReturn(sourcePackageMock);
     
         assertDoesNotThrow(() -> {
@@ -80,7 +59,6 @@ public class UpdateTest {
                 testCurator,
                 "A",
                 Paths.get("update_A"),
-                "some_repo",
                 "we're good"
             );
         });
@@ -95,26 +73,6 @@ public class UpdateTest {
                 testCurator,
                 "A",
                 Paths.get("update_A"),
-                "some_repo",
-                "did I not add this yet?"
-            );
-        });
-    }
-
-    @Test
-    void updateFailsWhenPackageDoesNotHaveReplicaInRepository() {
-        when(packageServiceMock.getInfoPackage("A")).thenReturn(infoPackageMock);
-        when(repositoryServiceMock.getRepository("some_repo")).thenReturn(repositoryMock);
-        when(registryMock.getClient("some_repo")).thenReturn(clientMock);
-        when(replicaServiceMock.getReplica(infoPackageMock, repositoryMock))
-            .thenReturn(null);
-
-        assertThrows(NoEntityException.class, () -> {
-            updateFactory.create(
-                testCurator,
-                "A",
-                Paths.get("update_A"),
-                "some_repo",
                 "did I not add this yet?"
             );
         });
@@ -123,10 +81,6 @@ public class UpdateTest {
     @Test
     void updateExecutes() {
         when(packageServiceMock.getInfoPackage("A")).thenReturn(infoPackageMock);
-        when(repositoryServiceMock.getRepository("some_repo")).thenReturn(repositoryMock);
-        when(registryMock.getClient("some_repo")).thenReturn(clientMock);
-        when(replicaServiceMock.getReplica(infoPackageMock, repositoryMock))
-            .thenReturn(replicaMock);
 
         when(depositDirMock.getPackage(Paths.get("update_A"))).thenReturn(sourcePackageMock);
 
@@ -134,17 +88,16 @@ public class UpdateTest {
             testCurator,
             "A",
             Paths.get("update_A"),
-            "some_repo",
             "we're good"
         );
 
         update.execute();
-        verify(clientMock).updateObjectFiles(
+        verify(repositoryClientMock).updateObjectFiles(
             "A",
             sourcePackageMock,
             testCurator,
             "we're good"
         );
-        verify(replicaServiceMock).updateReplica(replicaMock);
+        verify(packageServiceMock).updateInfoPackage(infoPackageMock);
     }
 }

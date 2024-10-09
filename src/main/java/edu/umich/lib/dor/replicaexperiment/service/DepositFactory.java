@@ -6,23 +6,17 @@ import edu.umich.lib.dor.replicaexperiment.domain.Curator;
 
 public class DepositFactory {
     InfoPackageService infoPackageService;
-    RepositoryService repositoryService;
-    ReplicaService replicaService;
-    RepositoryClientRegistry repositoryClientRegistry;
+    RepositoryClient repositoryClient;
     Path depositPath;
     DepositDirectory depositDir;
 
     public DepositFactory(
         InfoPackageService infoPackageService,
-        RepositoryService repositoryService,
-        ReplicaService replicaService,
-        RepositoryClientRegistry repositoryClientRegistry,
+        RepositoryClient repositoryClient,
         DepositDirectory depositDir
     ) {
         this.infoPackageService = infoPackageService;
-        this.repositoryService = repositoryService;
-        this.replicaService = replicaService;
-        this.repositoryClientRegistry = repositoryClientRegistry;
+        this.repositoryClient = repositoryClient;
         this.depositDir = depositDir;
     }
 
@@ -30,19 +24,15 @@ public class DepositFactory {
         Curator curator,
         String packageIdentifier,
         Path sourcePath,
-        String repositoryName,
         String message
     ) {
         return new Deposit(
             infoPackageService,
-            repositoryService,
-            replicaService,
-            repositoryClientRegistry,
+            repositoryClient,
             depositDir,
             curator,
             packageIdentifier,
             sourcePath,
-            repositoryName,
             message
         );
     }

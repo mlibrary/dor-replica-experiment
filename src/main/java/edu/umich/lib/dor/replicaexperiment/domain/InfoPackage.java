@@ -1,28 +1,27 @@
 package edu.umich.lib.dor.replicaexperiment.domain;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.time.Instant;
 
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
+import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.NaturalId;
 
 @Entity
 public class InfoPackage {
     @Id
-    @GeneratedValue(strategy=GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
     @NaturalId
     private String identifier;
 
-    @OneToMany(mappedBy="infoPackage", fetch=FetchType.LAZY)
-    private Set<Replica> replicas = new HashSet<>();
+    @CreationTimestamp()
+    private Instant createdAt;
+
+    private Instant updatedAt;
 
     protected InfoPackage() {}
 
@@ -38,32 +37,25 @@ public class InfoPackage {
         return identifier;
     }
 
-    public Set<Replica> getReplicas() {
-        return replicas;
+    public Instant getCreatedAt() {
+        return createdAt;
     }
 
-    public void addReplica(Replica replica) {
-        replicas.add(replica);
+    public Instant getUpdatedAt() {
+        return updatedAt;
     }
 
-    public int getNumReplicas() {
-        return replicas.size();
-    }
-
-    public boolean hasAReplicaIn(String repositoryName) {
-        List<String> repositoryNames = replicas.stream()
-            .map(replica -> { return replica.getRepository().getName(); })
-            .toList();
-        return repositoryNames.contains(repositoryName);
+    public void setUpdatedAt(Instant updatedAt) {
+        this.updatedAt = updatedAt;
     }
 
     @Override
     public String toString() {
+        // TO DO - add new fields to string formatting
         return String.format(
-            "InfoPackage[id=%d, identifier='%s', numReplicas=%d]",
+            "InfoPackage[id=%d, identifier='%s']",
             id,
-            identifier,
-            getNumReplicas()
+            identifier
         );
     }
 }
