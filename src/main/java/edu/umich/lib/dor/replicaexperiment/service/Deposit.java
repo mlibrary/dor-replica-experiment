@@ -2,11 +2,16 @@ package edu.umich.lib.dor.replicaexperiment.service;
 
 import java.nio.file.Path;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import edu.umich.lib.dor.replicaexperiment.domain.Curator;
 import edu.umich.lib.dor.replicaexperiment.domain.InfoPackage;
 import edu.umich.lib.dor.replicaexperiment.exception.EntityAlreadyExistsException;
 
 public class Deposit implements Command {
+    static final Logger log = LoggerFactory.getLogger(Deposit.class);
+
     private InfoPackageService infoPackageService;
     private RepositoryClient repositoryClient;
 
@@ -51,5 +56,6 @@ public class Deposit implements Command {
         );
 
         infoPackageService.createInfoPackage(packageIdentifier);
+        log.info("Deposited!!!");
     }
 }

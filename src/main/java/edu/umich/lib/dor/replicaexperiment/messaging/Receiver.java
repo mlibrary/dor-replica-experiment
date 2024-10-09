@@ -25,7 +25,10 @@ public class Receiver {
     public void listenDeposit(DepositMessage depositMessage) throws InterruptedException {
         Thread.sleep(3000);
         depositFactory.create(
-            new Curator("test", "test@example.edu"),
+            new Curator(
+                depositMessage.getCuratorUsername(),
+                depositMessage.getCuratorEmail()
+            ),
             depositMessage.getPackageIdentifier(),
             Paths.get(depositMessage.getDepositSourcePath()),
             depositMessage.getMessage()

@@ -55,12 +55,18 @@ public class InfoPackageController {
 
     @PostMapping(path = "/deposit-message")
     public @ResponseBody String depositMessage(
+        @RequestParam String curatorUsername,
+        @RequestParam String curatorEmail,
         @RequestParam String packageIdentifier,
         @RequestParam String depositSourcePath,
         @RequestParam String message
     ) {
         DepositMessage depositMessage = new DepositMessage(
-            packageIdentifier, depositSourcePath, message
+            curatorUsername,
+            curatorEmail,
+            packageIdentifier,
+            depositSourcePath,
+            message
         );
         rabbitTemplate.convertAndSend("depositQueue", depositMessage);
         return "depositing";
