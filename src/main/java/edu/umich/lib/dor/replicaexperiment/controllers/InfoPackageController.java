@@ -19,6 +19,8 @@ import edu.umich.lib.dor.replicaexperiment.controllers.dtos.InfoPackageDto;
 import edu.umich.lib.dor.replicaexperiment.domain.Curator;
 import edu.umich.lib.dor.replicaexperiment.domain.InfoPackage;
 import edu.umich.lib.dor.replicaexperiment.messaging.messages.DepositMessage;
+import edu.umich.lib.dor.replicaexperiment.messaging.messages.PurgeMessage;
+import edu.umich.lib.dor.replicaexperiment.messaging.messages.UpdateMessage;
 import edu.umich.lib.dor.replicaexperiment.service.Deposit;
 import edu.umich.lib.dor.replicaexperiment.service.DepositFactory;
 import edu.umich.lib.dor.replicaexperiment.service.InfoPackageService;
@@ -87,6 +89,25 @@ public class InfoPackageController {
         return new InfoPackageDto(newInfoPackage);
     }
 
+    @PostMapping(path = "/update-message")
+    public @ResponseBody String updateMessage(
+        @RequestParam String curatorUsername,
+        @RequestParam String curatorEmail,
+        @RequestParam String packageIdentifier,
+        @RequestParam String depositSourcePath,
+        @RequestParam String message
+    ) {
+        UpdateMessage updateMessage = new UpdateMessage(
+            curatorUsername,
+            curatorEmail,
+            packageIdentifier,
+            depositSourcePath,
+            message
+        );
+        rabbitTemplate.convertAndSend("updateQueue", updateMessage);
+        return "updating";
+    }
+
     @PutMapping(path = "/update")
     public @ResponseBody InfoPackageDto update(
         @RequestParam String identifier,
@@ -100,6 +121,15 @@ public class InfoPackageController {
         update.execute();
         var newInfoPackage = infoPackageService.getInfoPackage(identifier);
         return new InfoPackageDto(newInfoPackage);
+    }
+
+    @DeleteMapping(path = "/purge-message")
+    public @ResponseBody String purgeMessage(
+        @RequestParam String identifier
+    ) {
+        PurgeMessage purgeMessage = new PurgeMessage(identifier);
+        rabbitTemplate.convertAndSend("purgeQueue", purgeMessage);
+        return "purging";
     }
 
     @DeleteMapping(path = "/purge")

@@ -61,4 +61,14 @@ public class RabbitMqConfig {
     public Queue depositQueue() {
         return new Queue("depositQueue", true);
     }
+
+    @Bean
+    public Queue updateQueue() {
+        return new Queue("updateQueue", true);
+    }
+
+    @Bean
+    public Queue purgeQueue() {
+        return new Queue("purgeQueue", true);
+    }
 }
