@@ -1,9 +1,13 @@
 package edu.umich.lib.dor.replicaexperiment.controllers;
 
+import java.io.UnsupportedEncodingException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
+import org.springframework.amqp.core.Message;
+import org.springframework.amqp.core.MessageBuilder;
+import org.springframework.amqp.core.MessageProperties;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -14,6 +18,10 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 
 import edu.umich.lib.dor.replicaexperiment.controllers.dtos.InfoPackageDto;
 import edu.umich.lib.dor.replicaexperiment.domain.Curator;
@@ -62,7 +70,7 @@ public class InfoPackageController {
         @RequestParam String packageIdentifier,
         @RequestParam String depositSourcePath,
         @RequestParam String message
-    ) {
+    ) throws JsonProcessingException, UnsupportedEncodingException {
         DepositMessage depositMessage = new DepositMessage(
             curatorUsername,
             curatorEmail,
@@ -70,7 +78,15 @@ public class InfoPackageController {
             depositSourcePath,
             message
         );
-        rabbitTemplate.convertAndSend("depositQueue", depositMessage);
+
+        ObjectWriter writer = new ObjectMapper().writer();
+        String payload = writer.writeValueAsString(depositMessage);
+        Message messageObj = MessageBuilder.withBody(payload.getBytes("UTF-8"))
+            .setContentType(MessageProperties.CONTENT_TYPE_JSON)
+            .setHeader("__TypeId__", "depositMessage")
+            .build();
+
+        rabbitTemplate.send("depositQueue", messageObj);
         return "depositing";
     }
 
@@ -96,7 +112,7 @@ public class InfoPackageController {
         @RequestParam String packageIdentifier,
         @RequestParam String depositSourcePath,
         @RequestParam String message
-    ) {
+    ) throws JsonProcessingException, UnsupportedEncodingException {
         UpdateMessage updateMessage = new UpdateMessage(
             curatorUsername,
             curatorEmail,
@@ -104,7 +120,15 @@ public class InfoPackageController {
             depositSourcePath,
             message
         );
-        rabbitTemplate.convertAndSend("updateQueue", updateMessage);
+
+        ObjectWriter writer = new ObjectMapper().writer();
+        String payload = writer.writeValueAsString(updateMessage);
+        Message messageObj = MessageBuilder.withBody(payload.getBytes("UTF-8"))
+            .setContentType(MessageProperties.CONTENT_TYPE_JSON)
+            .setHeader("__TypeId__", "updateMessage")
+            .build();
+
+        rabbitTemplate.send("updateQueue", messageObj);
         return "updating";
     }
 
@@ -126,9 +150,17 @@ public class InfoPackageController {
     @DeleteMapping(path = "/purge-message")
     public @ResponseBody String purgeMessage(
         @RequestParam String identifier
-    ) {
+    ) throws JsonProcessingException, UnsupportedEncodingException {
         PurgeMessage purgeMessage = new PurgeMessage(identifier);
-        rabbitTemplate.convertAndSend("purgeQueue", purgeMessage);
+
+        ObjectWriter writer = new ObjectMapper().writer();
+        String payload = writer.writeValueAsString(purgeMessage);
+        Message messageObj = MessageBuilder.withBody(payload.getBytes("UTF-8"))
+            .setContentType(MessageProperties.CONTENT_TYPE_JSON)
+            .setHeader("__TypeId__", "purgeMessage")
+            .build();
+
+        rabbitTemplate.send("purgeQueue", messageObj);
         return "purging";
     }
 

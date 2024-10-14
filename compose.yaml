@@ -27,6 +27,7 @@ services:
       target: base
     depends_on:
       - database
+      - rabbitmq
     command: gradle bootRun
     volumes:
       - ./src:/app/src
