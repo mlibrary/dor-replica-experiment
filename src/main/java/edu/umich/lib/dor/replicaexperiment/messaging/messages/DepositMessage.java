@@ -1,8 +1,9 @@
 package edu.umich.lib.dor.replicaexperiment.messaging.messages;
 
+import java.util.Map;
+
 public class DepositMessage {
-    private String curatorUsername;
-    private String curatorEmail;
+    private Map<String, String> curator;
     private String packageIdentifier;
     private String depositSourcePath;
     private String message;
@@ -10,14 +11,12 @@ public class DepositMessage {
     public DepositMessage() {}
 
     public DepositMessage(
-        String curatorUsername,
-        String curatorEmail,
+        Map<String, String> curator,
         String packageIdentifier,
         String depositSourcePath,
         String message
     ) {
-        this.curatorUsername = curatorUsername;
-        this.curatorEmail = curatorEmail;
+        this.curator = curator;
         this.packageIdentifier = packageIdentifier;
         this.depositSourcePath = depositSourcePath;
         this.message = message;
@@ -35,11 +34,7 @@ public class DepositMessage {
         return message;
     }
 
-    public String getCuratorUsername() {
-        return curatorUsername;
-    }
-
-    public String getCuratorEmail() {
-        return curatorEmail;
+    public Map<String, String> getCurator() {
+        return curator;
     }
 }

@@ -4,6 +4,7 @@ import java.io.UnsupportedEncodingException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageBuilder;
@@ -72,8 +73,7 @@ public class InfoPackageController {
         @RequestParam String message
     ) throws JsonProcessingException, UnsupportedEncodingException {
         DepositMessage depositMessage = new DepositMessage(
-            curatorUsername,
-            curatorEmail,
+            Map.of("username", curatorUsername, "email", curatorEmail),
             packageIdentifier,
             depositSourcePath,
             message
@@ -114,8 +114,7 @@ public class InfoPackageController {
         @RequestParam String message
     ) throws JsonProcessingException, UnsupportedEncodingException {
         UpdateMessage updateMessage = new UpdateMessage(
-            curatorUsername,
-            curatorEmail,
+            Map.of("username", curatorUsername, "email", curatorEmail),
             packageIdentifier,
             depositSourcePath,
             message

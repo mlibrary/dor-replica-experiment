@@ -32,11 +32,11 @@ public class Receiver {
     }
 
     @RabbitListener(queues = "depositQueue")
-    public void listenDeposit(DepositMessage depositMessage) throws InterruptedException {
+    public void listenDeposit(DepositMessage depositMessage) {
         depositFactory.create(
             new Curator(
-                depositMessage.getCuratorUsername(),
-                depositMessage.getCuratorEmail()
+                depositMessage.getCurator().get("username"),
+                depositMessage.getCurator().get("email")
             ),
             depositMessage.getPackageIdentifier(),
             Paths.get(depositMessage.getDepositSourcePath()),
@@ -48,8 +48,8 @@ public class Receiver {
     public void listenUpdate(UpdateMessage updateMessage) {
         updateFactory.create(
             new Curator(
-                updateMessage.getCuratorUsername(),
-                updateMessage.getCuratorEmail()
+                updateMessage.getCurator().get("username"),
+                updateMessage.getCurator().get("email")
             ),
             updateMessage.getPackageIdentifier(),
             Paths.get(updateMessage.getDepositSourcePath()),
